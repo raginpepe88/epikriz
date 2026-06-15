@@ -1860,6 +1860,20 @@
         updateLezyonSegment(card, bolgeName, chip.classList.contains('active')?chip.textContent.trim():null);
       }
     }
+    // Lezyon kartında "Lezyon tipi" "Yanık" seçilince derece alt seçeneklerini göster
+    if(group.dataset.role==='tip'){
+      const card=chip.closest('.lezyon-card');
+      if(card){
+        const yanikActive=chip.classList.contains('active')&&chip.textContent.trim()==='Yanık';
+        const dereceGroup=card.querySelector('[data-role="yanikDerece"]');
+        const dereceLabel=card.querySelector('[data-role="yanik-label"]');
+        if(dereceGroup&&dereceLabel){
+          dereceGroup.style.display=yanikActive?'flex':'none';
+          dereceLabel.style.display=yanikActive?'block':'none';
+          if(!yanikActive)dereceGroup.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+        }
+      }
+    }
     refreshDetail();updateSymptomSureBoxes();render();
   });
   form.addEventListener('input',render);
@@ -2309,6 +2323,13 @@
         <button class="chip">Kesi</button>
         <button class="chip">Ödem</button>
         <button class="chip">Hematom</button>
+        <button class="chip">Yanık</button>
+      </div>
+      <div class="sub" data-role="yanik-label" style="display:none;">Yanık derecesi</div>
+      <div class="chips" data-single="true" data-role="yanikDerece" style="display:none;">
+        <button class="chip">1. derece</button>
+        <button class="chip">2. derece</button>
+        <button class="chip">3. derece yanık uyumlu görünüm</button>
       </div>
       <div class="sub">Boyut (cm)</div>
       <div class="mini-row">
@@ -2377,7 +2398,17 @@
     if(x&&y)parts.push(`${x}x${y} cm boyutunda`);
     else if(x)parts.push(`${x} cm boyutunda`);
 
-    parts.push(tip?lc(tip.textContent.trim()):'lezyon');
+    let tipText=tip?lc(tip.textContent.trim()):'lezyon';
+    if(tip&&tip.textContent.trim()==='Yanık'){
+      const derece=card.querySelector('[data-role="yanikDerece"] .chip.active');
+      if(derece){
+        const d=derece.textContent.trim();
+        tipText=d.toLocaleLowerCase('tr').includes('yanık')?d.toLocaleLowerCase('tr'):`${d} yanık`;
+      }else{
+        tipText='yanık';
+      }
+    }
+    parts.push(tipText);
     return parts.join(' ');
   }
 
@@ -2568,7 +2599,7 @@
       const yEl=card.querySelector('[data-role="y"]');
       return {
         yan:get('yan'), bolge:get('bolge'), altbolge:get('altbolge'), segment:get('segment'),
-        pozisyon:get('pozisyon'), tip:get('tip'),
+        pozisyon:get('pozisyon'), tip:get('tip'), yanikDerece:get('yanikDerece'),
         x:xEl?xEl.value:'', y:yEl?yEl.value:'',
       };
     });
@@ -2587,6 +2618,14 @@
       updateLezyonAltBolge(card, st.bolge, st.altbolge, st.segment);
       setChipActive(card.querySelector('[data-role="pozisyon"]'), st.pozisyon);
       setChipActive(card.querySelector('[data-role="tip"]'), st.tip);
+      const yanikActive=st.tip==='Yanık';
+      const dereceGroup=card.querySelector('[data-role="yanikDerece"]');
+      const dereceLabel=card.querySelector('[data-role="yanik-label"]');
+      if(dereceGroup&&dereceLabel){
+        dereceGroup.style.display=yanikActive?'flex':'none';
+        dereceLabel.style.display=yanikActive?'block':'none';
+        setChipActive(dereceGroup, yanikActive?st.yanikDerece:null);
+      }
       const xEl=card.querySelector('[data-role="x"]');
       const yEl=card.querySelector('[data-role="y"]');
       if(xEl)xEl.value=st.x||'';
@@ -2748,7 +2787,7 @@
 
     let t=[];
     if(patient)t.push(patient+'.');
-    rows.forEach(([k,v])=>{if(v)t.push(k+': '+v);});
+    rows.forEach(([k,v])=>{if(v)t.push(k==='Adli Rapor'?v:(k+': '+v));});
     lastText=t.join('\n');
   }
 
