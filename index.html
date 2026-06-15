@@ -2666,10 +2666,13 @@
       c.classList.toggle('active', !!(k!=null && chips[k]));
     });
     const inputs=st.inputs||{};
+    const gksDefaults={f_gks_goz:'4',f_gks_motor:'6',f_gks_verbal:'5',f_adli_gks_goz:'4',f_adli_gks_motor:'6',f_adli_gks_verbal:'5'};
     form.querySelectorAll('input,textarea').forEach(el=>{
       if(el.closest('#lezyonList'))return;
       const k=pathKey(el);
-      el.value=(k!=null && inputs[k]!==undefined)?inputs[k]:'';
+      let v=(k!=null && inputs[k]!==undefined)?inputs[k]:'';
+      if(v===''&&gksDefaults[el.id]!==undefined) v=gksDefaults[el.id];
+      el.value=v;
     });
     const examOpen=st.examOpen||{};
     examWrap.querySelectorAll('.exam-sys').forEach(s=>{
