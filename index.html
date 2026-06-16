@@ -106,9 +106,7 @@
     background:#b8b8b8;font-weight:700;}
   .chip.active::before{content:"\2713 ";}
 
-  .durat-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:9px;}
-  .durat-row .durat-lbl{font-size:11px;font-weight:700;color:#000;}
-  .durat-row .txt{width:64px;flex:none;}
+
 
   .symptom-sure-wrap{display:flex;flex-direction:column;gap:5px;margin-top:7px;}
   .symptom-sure-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;
@@ -700,18 +698,7 @@
         <button class="chip">Myoklonik</button>
         <button class="chip">Fokal</button>
       </div>
-      <div class="durat-row">
-        <span class="durat-lbl">Şikayet süresi:</span>
-        <input class="txt" id="f_sikayet_sure" type="number" min="0" step="any" placeholder="—">
-        <div class="chips" data-single="true" id="f_sikayet_birim">
-          <button class="chip">dakika</button>
-          <button class="chip">saat</button>
-          <button class="chip">gün</button>
-          <button class="chip">hafta</button>
-          <button class="chip">ay</button>
-          <button class="chip">yıl</button>
-        </div>
-      </div>
+
       <div class="symptom-sure-wrap" id="symptomSureWrap"></div>
       <input class="extra" data-extra placeholder="Diğer şikayet (serbest metin)">
       <div class="detay-wrap" id="detay"></div>
@@ -2761,8 +2748,7 @@
     const arr=arrEl?arrEl.textContent.trim():'';
 
     const sikayetBase=sikayetText();
-    const sure=durationText();
-    const sikayetRow=(sure&&sikayetBase)?(sure+sikayetBase):sikayetBase;
+    const sikayetRow=sikayetBase;
 
     const rows=[
       ['GKS', gksText()],
@@ -2864,12 +2850,6 @@
     return parts.join(', ');
   }
 
-  function durationText(){
-    const v=val('f_sikayet_sure');
-    const unitEl=form.querySelector('#f_sikayet_birim .chip.active');
-    if(!v||!unitEl)return '';
-    return `${v} ${unitEl.textContent.trim()} önce başlayan `;
-  }
 
   function cap(s){return s.charAt(0).toLocaleUpperCase('tr')+s.slice(1);}
   function lc(s){return s.charAt(0).toLocaleLowerCase('tr')+s.slice(1);}
