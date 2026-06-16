@@ -13645,23 +13645,66 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
   let activeIndex=null;
 
   // --- Senkron/oturum durumu: DOM-index yerine kararlı (stable) anahtarlarla serileştirme ---
-  // pathKey: bir elemanin 'form' köküne kadar her seviyede kardesleri arasindaki konumundan
-  // olusan bir yol döndürür. Bu yol, sadece o elemanin kendi atalarinin kardes sayisina
-  // bagli oldugundan, #lezyonList icindeki dinamik kart sayisi (atalar zincirinde
-  // #lezyonList GECMEYEN elemanlar icin) bu yolu ETKILEMEZ. #lezyonList'in kendisi
-  // kendi kardesleri arasinda sabit bir konumda oldugu icin, lezyon kartlarinin
-  // sayisi degissin/degismesin, dışındaki tüm chip/input'larin yolu iki cihazda da
-  // birbirinin AYNISI olur.
-  function pathKey(el){
-    const path=[];
-    let n=el;
-    while(n && n!==form){
-      const p=n.parentElement;
-      if(!p)return null;
-      path.unshift(Array.prototype.indexOf.call(p.children,n));
-      n=p;
+  // pathKey: bir elemana SABİT (DOM konumundan bağımsız) bir anahtar verir.
+  // Eskiden anahtar elemanın kardeşler arasındaki konum yoluydu; bir chip/bölüm
+  // eklenince ya da taşınınca anahtarlar kayıyor, bu da kaydedilmiş/senkronlanmış
+  // durumun güncelleme sonrası YANLIŞ kutuya yüklenmesi riskini doğuruyordu.
+  // Artık anahtar İÇERİĞE dayalı: bölüm(data-field) + kategori başlığı + chip metni
+  // (ya da input id'si). Sıralama değişse de anahtar aynı kalır. Bir kez hesaplanıp
+  // el.dataset.k'de önbelleğe alınır.
+  function computeBaseKey(el){
+    if(!el.closest)return null;
+    if(el.id)return 'id:'+el.id;
+    if(el.classList&&el.classList.contains('sym-sure-sel')){
+      const row=el.closest('.symptom-sure-row');
+      return 'sym:'+(row?row.dataset.symptom:'?');
     }
-    return path.join('.');
+    // Ata zincirinden sabit bağlam topla: bölüm(data-field) + en yakın id'li kap +
+    // ilk data-sys/role/complaint. (Yapısal bölümlerde tekrarlayan Yok/NML/Sağ gibi
+    // chip'leri ayırt eder; ör. #fastLuq vs #fastRuq.)
+    let ancId='',secF='',extra='',n=el.parentElement;
+    while(n&&n!==form){
+      if(!ancId&&n.id)ancId=n.id;
+      if(n.dataset){
+        if(!secF&&n.dataset.field)secF=n.dataset.field;
+        if(!extra&&n.dataset.sys)extra='y:'+n.dataset.sys;
+        else if(!extra&&n.dataset.role)extra='r:'+n.dataset.role;
+        else if(!extra&&n.dataset.complaint)extra='p:'+n.dataset.complaint;
+      }
+      n=n.parentElement;
+    }
+    // grup içi en yakın önceki etiket (kategori başlığı / subhead / <label>)
+    let lbl='',s=el.previousElementSibling;
+    while(s){
+      const c=(s.className||'').toString();
+      if(s.tagName==='LABEL'||/chip-cat-label|subhead/i.test(c)){lbl=(s.textContent||'').trim();break;}
+      s=s.previousElementSibling;
+    }
+    const ctx=[secF&&'s:'+secF,ancId&&'a:'+ancId,extra,lbl&&'l:'+lbl].filter(Boolean).join('|');
+    const self=(el.classList&&el.classList.contains('chip'))
+      ? 'c:'+((el.dataset.full||el.textContent)||'').trim()
+      : el.tagName+':'+(el.placeholder||el.name||'');
+    return ctx+'::'+self;
+  }
+  function pathKey(el){
+    if(el.dataset&&el.dataset.k)return el.dataset.k;
+    const key=computeBaseKey(el);
+    if(el.dataset&&key!=null)el.dataset.k=key;
+    return key;
+  }
+  // Yüklenince statik chip/input'lara sabit anahtarları DOM sırasına göre deterministik
+  // ata; aynı imza tekrarlarsa (nadir) sayaçla ayır. Lezyon kartları hariç (kendi state'i var).
+  function assignStableKeys(){
+    const used=new Set();
+    form.querySelectorAll('.chip,input,select,textarea').forEach(el=>{
+      if(el.closest('#lezyonList'))return;
+      const base=computeBaseKey(el);
+      if(base==null)return;
+      let key=base,i=2;
+      while(used.has(key))key=base+'#'+(i++);
+      used.add(key);
+      el.dataset.k=key;
+    });
   }
 
   // Lezyon kartlari: dinamik olarak eklenip/silinebildigi ve alt-bölge/segment chip
@@ -13985,6 +14028,7 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
     el.textContent=msg;el.classList.add('show');
     clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove('show'),1600);
   }
+  assignStableKeys();
   setGksDefaults();
   renderPatientTabs();
   render();
