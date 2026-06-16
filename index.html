@@ -266,6 +266,8 @@
   .score-head .arrow{display:inline-block;transition:transform .1s;}
   .score-item{display:flex;align-items:center;justify-content:space-between;gap:5px;margin-bottom:4px;}
   .score-item label{flex:1;font-size:10px;line-height:1.2;color:#000;}
+  .para-inp{flex:none;font-size:10px;font-family:inherit;border:2px solid;border-color:var(--shadow) var(--light) var(--light) var(--shadow);background:#fff;color:#000;border-radius:0;padding:2px 3px;}
+  input.para-inp{width:64px;} select.para-inp{max-width:160px;}
   .score-item select{font-size:10px;font-family:inherit;max-width:90px;
     border:2px solid;border-color:var(--shadow) var(--light) var(--light) var(--shadow);
     background:#fff;color:#000;border-radius:0;}
@@ -478,6 +480,40 @@
             <div>Kafsız (Uncuffed): <b>—</b></div>
           </div>
           <div style="font-size:9px;color:#555;margin-top:5px;text-transform:none;line-height:1.4;">&#9888; Yalnızca 1-8 yaş için geçerlidir.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="score-section" id="yonlendirmeSection">
+    <button type="button" class="score-section-toggle" id="yonlendirmeSectionToggle">
+      <span>💊 Klinik Yönlendirme</span><span class="s-arrow">▶</span>
+    </button>
+    <div id="yonlendirmeSectionBody" style="display:none;">
+      <div class="score-calc" id="parasetamolCalc">
+        <button type="button" class="score-head" onclick="this.closest('.score-calc').classList.toggle('open')">
+          <span>Parasetamol (Asetaminofen)</span><span class="arrow">▶</span>
+        </button>
+        <div class="score-body">
+          <div style="font-size:10px;font-weight:700;margin-bottom:6px;text-transform:none;">Parasetamol Zehirlenmesi — Tedavi Yönlendirme</div>
+          <div class="score-item"><label style="text-transform:none;">Alım paterni</label>
+            <select id="para_pattern" class="para-inp" onchange="calcParasetamol()">
+              <option value="akut">Akut tek alım (≤24 sa)</option>
+              <option value="tekrarli">Tekrarlı supraterapötik (&gt;24 sa)</option>
+              <option value="guvenilmez">Güvenilmez öykü</option>
+            </select>
+          </div>
+          <div class="score-item" id="para_doz_row"><label style="text-transform:none;">Alınan toplam doz (g)</label>
+            <input type="number" id="para_doz" class="para-inp" min="0" step="0.5" placeholder="—" oninput="calcParasetamol()"></div>
+          <div class="score-item" id="para_kilo_row"><label style="text-transform:none;">Hasta kilosu (kg)</label>
+            <input type="number" id="para_kilo" class="para-inp" min="0" step="1" placeholder="—" oninput="calcParasetamol()"></div>
+          <div class="score-item" id="para_sure_row"><label style="text-transform:none;">Alımdan bu yana süre (saat)</label>
+            <input type="number" id="para_sure" class="para-inp" min="0" step="0.5" placeholder="—" oninput="calcParasetamol()"></div>
+          <div class="score-item" id="para_duzey_row"><label style="text-transform:none;">Serum parasetamol (mcg/mL)</label>
+            <input type="number" id="para_duzey" class="para-inp" min="0" step="1" placeholder="—" oninput="calcParasetamol()"></div>
+          <div class="score-item"><label style="text-transform:none;">AST/ALT yüksek</label>
+            <input type="checkbox" id="para_ast" onchange="calcParasetamol()"></div>
+          <div class="score-result" id="paraResult" style="text-transform:none;font-weight:400;line-height:1.5;margin-top:6px;"><div style="color:#555;">Alım paterni ve değerleri girin.</div></div>
+          <div style="font-size:9px;color:#555;margin-top:6px;text-transform:none;line-height:1.4;">&#9888; Klinik karar DESTEK aracıdır; hekim muhakemesi, Revised Rumack-Matthew nomogramı ve zehir danışma yerine geçmez. Kaynak: UpToDate — <i>Acetaminophen poisoning: Management</i> (Apr 2026).</div>
         </div>
       </div>
     </div>
@@ -4159,7 +4195,58 @@
     }
     bindSectionToggle('skorSectionToggle','skorSectionBody');
     bindSectionToggle('hesapSectionToggle','hesapSectionBody');
+    bindSectionToggle('yonlendirmeSectionToggle','yonlendirmeSectionBody');
   }
+  /* ===== Parasetamol (Asetaminofen) Klinik Yonlendirme — kaynak: UpToDate Management (Apr 2026) ===== */
+  function calcParasetamol(){
+    const g=id=>document.getElementById(id);
+    const pattern=g('para_pattern')?.value||'akut';
+    const doz=parseFloat(g('para_doz')?.value);
+    const kilo=parseFloat(g('para_kilo')?.value);
+    const sure=parseFloat(g('para_sure')?.value);
+    const duzey=parseFloat(g('para_duzey')?.value);
+    const ast=!!(g('para_ast')&&g('para_ast').checked);
+    const r=g('paraResult');
+    if(!r)return;
+    const akut=(pattern==='akut');
+    ['para_doz_row','para_kilo_row','para_sure_row'].forEach(id=>{const e=g(id);if(e)e.style.display=akut?'':'none';});
+    const L=[];
+    const line=(txt,kind)=>{
+      const col=kind==='nac'?'#a00':kind==='warn'?'#b35a00':kind==='ok'?'#060':'#000';
+      L.push(`<div style="color:${col};font-weight:${kind==='nac'?'700':'400'};margin-bottom:3px;">${txt}</div>`);
+    };
+    if(akut){
+      const mgkg=(!isNaN(doz)&&!isNaN(kilo)&&kilo>0)?(doz*1000/kilo):null;
+      const toksik=(!isNaN(doz)&&doz>=7.5)||(mgkg!==null&&mgkg>=150);
+      if(mgkg!==null)line(`Doz: <b>${mgkg.toFixed(0)} mg/kg</b> (${doz} g)`,'info');
+      else if(!isNaN(doz))line(`Doz: <b>${doz} g</b> — mg/kg için kilo girin`,'info');
+      if(!isNaN(doz)&&doz>30)line('⚠ Masif alım (&gt;30 g): erken (&lt;8 sa) bilinç değişikliği + metabolik asidoz/hiperlaktatemi olabilir → özel yönetim + zehir danışma.','warn');
+      if(toksik)line('Potansiyel toksik (≥150 mg/kg veya ≥7,5 g).','warn');
+      else if(mgkg!==null||!isNaN(doz))line('Eşik altı (&lt;150 mg/kg ve &lt;7,5 g): güvenilir öykü + tek alımda genelde NAC gerekmez; şüphede ≥4. saatte düzey.','ok');
+      if(ast)line('⚠ AST/ALT yüksek → akut alımda bu kadar hızlı hasar beklenmez; güvenilmez kabul edip düzeyden bağımsız NAC başla.','nac');
+      if(!isNaN(sure)){
+        if(toksik&&sure<=4)line('İlk 4 sa + toksik doz: Aktif kömür 1 g/kg (maks 50 g) PO düşün (kontrendikasyon: GİS obstrüksiyonu, korunmamış havayolunda bilinç değişikliği).','info');
+        if(sure<4)line('Serum düzeyini ≥4. saatte al → Revised Rumack-Matthew nomogramı.','info');
+        else if(sure<=24){
+          line('Düzeyi Revised Rumack-Matthew nomogramına işaretle (4–24 sa); tedavi çizgisi üstündeyse NAC.','info');
+          if(toksik&&sure>8)line('&gt;8 saat + toksik doz: düzeyi bekleme — NAC\'ı ampirik başla (gecikme karaciğer hasarı riskini artırır).','nac');
+        }else line('&gt;24 saat — akut nomogram penceresi dışında; düzey + AST/ALT ve klinik duruma göre, zehir danışma.','warn');
+      }else line('Süreyi gir (kömür / nomogram / ampirik NAC zamanlaması için).','info');
+    }else if(pattern==='tekrarli'){
+      line('Tekrarlı supraterapötik alım — nomogram KULLANILAMAZ.','warn');
+      line('Kriter: &gt;6 g/gün (150 mg/kg/gün) 24–48 sa VEYA &gt;4 g/gün (100 mg/kg/gün) &gt;48 sa → düzey + AST/ALT al.','info');
+      if((!isNaN(duzey)&&duzey>=20)||ast)line('NAC başla — düzey ≥20 mcg/mL (132 µmol/L) veya AST/ALT yüksek.','nac');
+      else if(!isNaN(duzey))line('Düzey &lt;20 mcg/mL ve AST/ALT normal → NAC genelde gerekmez; klinik duruma göre.','ok');
+      else line('Serum düzeyi + AST/ALT al; ≥20 mcg/mL veya AST/ALT yüksekse NAC.','info');
+    }else{
+      line('Güvenilmez öykü (zaman bilinmiyor) — nomogram KULLANILAMAZ.','warn');
+      if((!isNaN(duzey)&&duzey>10)||ast)line('NAC başla — düzey &gt;10 mcg/mL (66 µmol/L) veya AST/ALT yüksek.','nac');
+      else if(!isNaN(duzey))line('Düzey ≤10 mcg/mL ve AST/ALT normal → NAC genelde gerekmez; klinik duruma göre.','ok');
+      else line('Serum düzeyi + AST/ALT al; &gt;10 mcg/mL veya AST/ALT yüksekse NAC.','info');
+    }
+    r.innerHTML=L.join('');
+  }
+  window.calcParasetamol=calcParasetamol;
   /* ===== Parkland Hesaplayici ===== */
   function calcParkland(){
     const kg=parseFloat(document.getElementById('parkland_kg')?.value)||0;
