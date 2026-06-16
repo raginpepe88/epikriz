@@ -2,7 +2,7 @@
 
 **Amaç:** Acil servis hekiminin hızlıca kutu işaretleyerek profesyonel bir epikriz / hasta notu üretmesini sağlayan araç. Hedef: önce web, sonra iOS App Store uygulaması.
 
-**Ana dosya:** `epikriz.html` (tek dosya — HTML + CSS + JS, harici bağımlılık yok)
+**Ana dosya:** `index.html` (tek dosya — HTML + CSS + JS; web kökünden otomatik açılır)
 
 ---
 

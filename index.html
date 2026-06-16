@@ -461,6 +461,25 @@
           </div>
         </div>
       </div>
+      <div class="score-calc" id="ettCalc">
+        <button type="button" class="score-head" onclick="this.closest('.score-calc').classList.toggle('open')">
+          <span>🫁 Ped. ETT Boyutu</span><span class="arrow">▶</span>
+        </button>
+        <div class="score-body">
+          <div style="font-size:10px;font-weight:700;margin-bottom:6px;text-transform:none;">Pediyatrik ETT Boyutu (1-8 yaş)</div>
+          <div class="score-item">
+            <label style="text-transform:none;">Yaş (1-8)</label>
+            <input type="number" id="ett_yas" min="1" max="8" step="1" placeholder="—"
+              style="width:50px;flex:none;font-size:10px;font-family:inherit;border:2px solid;border-color:var(--shadow) var(--light) var(--light) var(--shadow);background:#fff;color:#000;border-radius:0;padding:2px 3px;"
+              oninput="calcEtt()">
+          </div>
+          <div class="score-result" id="ettResult" style="text-transform:none;font-weight:400;line-height:1.8;margin-top:6px;">
+            <div>Kaflı (Cuffed): <b>—</b></div>
+            <div>Kafsız (Uncuffed): <b>—</b></div>
+          </div>
+          <div style="font-size:9px;color:#555;margin-top:5px;text-transform:none;line-height:1.4;">&#9888; Yalnızca 1-8 yaş için geçerlidir.</div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -4053,6 +4072,21 @@
     r.innerHTML=`<div>İlk 24 saat toplam: <b>${Math.round(total)} mL</b></div><div>İlk 8 saat hızı: <b>${h8} mL/sa</b></div><div>Sonraki 16 saat hızı: <b>${h16} mL/sa</b></div>`;
   }
   window.calcParkland=calcParkland;
+
+  /* ===== ETT Hesaplayici ===== */
+  function calcEtt(){
+    const yas=parseInt(document.getElementById('ett_yas')?.value);
+    const r=document.getElementById('ettResult');
+    if(!r) return;
+    if(!yas||yas<1||yas>8){
+      r.innerHTML='<div>Kaflı (Cuffed): <b>—</b></div><div>Kafsız (Uncuffed): <b>—</b></div>';
+      return;
+    }
+    const cuffed=(3.5+yas/4).toFixed(1);
+    const uncuffed=(4.0+yas/4).toFixed(1);
+    r.innerHTML=`<div>Kaflı (Cuffed): <b>${cuffed} mm</b></div><div>Kafsız (Uncuffed): <b>${uncuffed} mm</b></div>`;
+  }
+  window.calcEtt=calcEtt;
 
   buildScorePanel();
 
