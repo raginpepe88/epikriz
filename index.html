@@ -887,6 +887,14 @@
         <button class="chip">görme kaybı</button>
         <button class="chip">konuşma bozukluğu</button>
         <button class="chip" id="chipNobet">Nöbet</button>
+      <div class="chips" id="nobetSub" style="display:none;flex-basis:100%;margin-top:7px;">
+        <button class="chip">Tonik-klonik</button>
+        <button class="chip">Tonik</button>
+        <button class="chip">Klonik</button>
+        <button class="chip">Absans</button>
+        <button class="chip">Myoklonik</button>
+        <button class="chip">Fokal</button>
+      </div>
         <button class="chip">uyuşma</button>
         <span class="chip-cat-label">Göz</span>
         <button class="chip">ani görme azalması</button>
@@ -947,34 +955,7 @@
         <button class="chip">panik atak</button>
         <span class="chip-cat-label">Toksikoloji</span>
         <button class="chip" id="chipAlkol">Alkol kullanımı</button>
-        <button class="chip" id="chipMadde">Madde kullanımı</button>
-        <button class="chip">CO maruziyeti şüphesi</button>
-        <button class="chip">ilaç intoksikasyonu</button>
-        <span class="chip-cat-label">Endokrin / Metabolik</span>
-        <button class="chip">hiperglisemi</button>
-        <button class="chip">hipoglisemi</button>
-        <span class="chip-cat-label">Dermatolojik</span>
-        <button class="chip">apse</button>
-        <button class="chip">cilt enfeksiyonu</button>
-        <button class="chip">döküntü/alerji</button>
-        <button class="chip">kaşıntı</button>
-        <span class="chip-cat-label">Genel / Diğer</span>
-        <button class="chip">akut ağrı (lokalize edilemeyen)</button>
-        <button class="chip">ateş</button>
-        <button class="chip">halsizlik</button>
-        <button class="chip">ilaç/madde alımı</button>
-        <button class="chip">ödem</button>
-        <button class="chip">presenkop</button>
-      </div>
-      <div class="chips" id="nobetSub" style="display:none;margin-top:7px;">
-        <button class="chip">Tonik-klonik</button>
-        <button class="chip">Tonik</button>
-        <button class="chip">Klonik</button>
-        <button class="chip">Absans</button>
-        <button class="chip">Myoklonik</button>
-        <button class="chip">Fokal</button>
-      </div>
-      <div id="alkolSub" style="display:none;margin-top:7px;flex-direction:column;gap:6px;">
+      <div id="alkolSub" style="display:none;flex-basis:100%;margin-top:7px;flex-direction:column;gap:6px;">
         <div class="chips" data-single="true" id="alkolTur">
           <button class="chip">bira</button>
           <button class="chip">rakı</button>
@@ -997,13 +978,32 @@
           </div>
         </div>
       </div>
-      <div class="chips" id="maddeSub" style="display:none;margin-top:7px;">
+        <button class="chip" id="chipMadde">Madde kullanımı</button>
+      <div class="chips" id="maddeSub" style="display:none;flex-basis:100%;margin-top:7px;">
         <button class="chip">bonzai</button>
         <button class="chip">esrar</button>
         <button class="chip">kokain</button>
         <button class="chip">MDMA</button>
         <button class="chip">metamfetamin</button>
         <button class="chip">opioid</button>
+      </div>
+        <button class="chip">CO maruziyeti şüphesi</button>
+        <button class="chip">ilaç intoksikasyonu</button>
+        <span class="chip-cat-label">Endokrin / Metabolik</span>
+        <button class="chip">hiperglisemi</button>
+        <button class="chip">hipoglisemi</button>
+        <span class="chip-cat-label">Dermatolojik</span>
+        <button class="chip">apse</button>
+        <button class="chip">cilt enfeksiyonu</button>
+        <button class="chip">döküntü/alerji</button>
+        <button class="chip">kaşıntı</button>
+        <span class="chip-cat-label">Genel / Diğer</span>
+        <button class="chip">akut ağrı (lokalize edilemeyen)</button>
+        <button class="chip">ateş</button>
+        <button class="chip">halsizlik</button>
+        <button class="chip">ilaç/madde alımı</button>
+        <button class="chip">ödem</button>
+        <button class="chip">presenkop</button>
       </div>
 
       <div class="symptom-sure-wrap" id="symptomSureWrap"></div>
@@ -2876,6 +2876,7 @@
     let parts=[];
     box.querySelectorAll(':scope > .chips .chip.active').forEach(c=>{
       if(nobetSub.contains(c))return;
+      if(alkolSub.contains(c))return;
       if(maddeSub.contains(c))return;
       let label;
       if(c===chipNobet){
@@ -2933,7 +2934,8 @@
     const wrap=document.getElementById('symptomSureWrap');
     if(!wrap)return;
     const mainChips=form.querySelector('[data-field="sikayet"] > .chips');
-    const activeChips=[...mainChips.querySelectorAll('.chip.active')];
+    const activeChips=[...mainChips.querySelectorAll('.chip.active')]
+      .filter(c=>!nobetSub.contains(c)&&!alkolSub.contains(c)&&!maddeSub.contains(c));
     const prev={};
     wrap.querySelectorAll('.symptom-sure-row').forEach(row=>{
       const sel=row.querySelector('.sym-sure-sel');
