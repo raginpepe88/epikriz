@@ -91,6 +91,10 @@
   .sec-label .num{color:#fff;font-variant-numeric:tabular-nums;opacity:.85;}
 
   .chips{display:flex;flex-wrap:wrap;gap:6px;}
+  .chip-cat-label{flex-basis:100%;font-size:10px;font-weight:700;color:#555;
+    margin:8px 0 1px;padding-bottom:2px;border-bottom:1px solid var(--shadow);
+    letter-spacing:.04em;text-transform:uppercase;pointer-events:none;}
+  .chip-cat-label:first-child{margin-top:0;}
   .chip{border:2px solid;border-color:var(--light) var(--dark) var(--dark) var(--light);
     box-shadow:inset 1px 1px 0 var(--hl),inset -1px -1px 0 var(--shadow);
     background:#c0c0c0;color:#000;font:inherit;font-size:12px;font-weight:400;
@@ -317,7 +321,7 @@
 
 <div class="topbar">
   <div class="brand"><span class="dot"></span> Acil Epikriz</div>
-  <span class="kvkk">Veriler cihazinizdan cikmaz</span>
+  <span class="kvkk" id="kvkkBadge">Veriler cihazinizdan cikmaz</span>
   <div class="spacer"></div>
   <button class="btn" id="btnSenkron" onclick="openSyncModal()" style="display:none;">🔄 Senkron<span class="auto-sync-dot" id="autoSyncDot" hidden title="Otomatik senkron açık"></span></button>
   <button class="btn" id="btnYeniHasta" onclick="resetAll()" style="display:none;">Yeni Hasta</button>
@@ -325,9 +329,9 @@
 </div>
 
 <div class="modal-overlay" id="syncModalOverlay" hidden>
-  <div class="modal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="syncModalTitle">
     <div class="modal-titlebar">
-      <span>Cihazlar Arası Senkronizasyon</span>
+      <span id="syncModalTitle">Cihazlar Arası Senkronizasyon</span>
       <button type="button" class="modal-close" onclick="closeSyncModal()">✕</button>
     </div>
     <div class="modal-body">
@@ -639,43 +643,54 @@
     <div class="section" data-field="sikayet">
       <div class="sec-label"><span class="num">03</span> Başvuru Şikayeti</div>
       <div class="chips">
-        <button class="chip">ateş</button>
+        <span class="chip-cat-label">Kardiyak / Vasküler</span>
+        <button class="chip">çarpıntı</button>
+        <button class="chip">göğüs ağrısı</button>
+        <button class="chip">senkop</button>
+        <button class="chip">yüksek tansiyon</button>
+        <span class="chip-cat-label">Solunum</span>
+        <button class="chip">nefes darlığı</button>
+        <button class="chip">öksürük</button>
+        <span class="chip-cat-label">Nörolojik</span>
         <button class="chip">baş ağrısı</button>
         <button class="chip">baş dönmesi</button>
-        <button class="chip">bel ağrısı</button>
         <button class="chip">bilinç bulanıklığı</button>
-        <button class="chip">boğaz ağrısı</button>
+        <button class="chip">konuşma bozukluğu</button>
+        <button class="chip" id="chipNobet">Nöbet</button>
+        <span class="chip-cat-label">Gastrointestinal</span>
         <button class="chip">bulantı-kusma</button>
-        <button class="chip">burun kanaması</button>
-        <button class="chip">çarpıntı</button>
-        <button class="chip">dizüri</button>
-        <button class="chip">döküntü/alerji</button>
-        <button class="chip">düşme</button>
-        <button class="chip">eklem ağrısı/şişlik</button>
         <button class="chip">GİS kanama</button>
-        <button class="chip">göğüs ağrısı</button>
-        <button class="chip">halsizlik</button>
-        <button class="chip">hayvan ısırığı</button>
-        <button class="chip">hematüri</button>
-        <button class="chip">hiperglisemi</button>
-        <button class="chip">hipoglisemi</button>
-        <button class="chip">idrar yapamama</button>
-        <button class="chip">ilaç/madde alımı</button>
         <button class="chip">ishal</button>
         <button class="chip">kabızlık</button>
         <button class="chip">karın ağrısı</button>
-        <button class="chip">kesik/laserasyon</button>
-        <button class="chip">konuşma bozukluğu</button>
-        <button class="chip">kulak ağrısı</button>
-        <button class="chip">nefes darlığı</button>
-        <button class="chip" id="chipNobet">Nöbet</button>
-        <button class="chip">öksürük</button>
-        <button class="chip">senkop</button>
+        <span class="chip-cat-label">Ürogenital</span>
+        <button class="chip">dizüri</button>
+        <button class="chip">hematüri</button>
+        <button class="chip">idrar yapamama</button>
+        <span class="chip-cat-label">Muskuloskeletal</span>
+        <button class="chip">bel ağrısı</button>
+        <button class="chip">eklem ağrısı/şişlik</button>
         <button class="chip">sırt ağrısı</button>
+        <span class="chip-cat-label">Travma / Acil</span>
+        <button class="chip">düşme</button>
+        <button class="chip">hayvan ısırığı</button>
+        <button class="chip">kesik/laserasyon</button>
         <button class="chip">trafik kazası</button>
         <button class="chip">travma</button>
         <button class="chip">yanık</button>
-        <button class="chip">yüksek tansiyon</button>
+        <span class="chip-cat-label">KBB</span>
+        <button class="chip">boğaz ağrısı</button>
+        <button class="chip">burun kanaması</button>
+        <button class="chip">kulak ağrısı</button>
+        <span class="chip-cat-label">Endokrin / Metabolik</span>
+        <button class="chip">hiperglisemi</button>
+        <button class="chip">hipoglisemi</button>
+        <span class="chip-cat-label">Dermatolojik</span>
+        <button class="chip">döküntü/alerji</button>
+        <span class="chip-cat-label">Genel / Diğer</span>
+        <button class="chip">ateş</button>
+        <button class="chip">halsizlik</button>
+        <button class="chip">ilaç/madde alımı</button>
       </div>
       <div class="chips" id="nobetSub" style="display:none;margin-top:7px;">
         <button class="chip">Tonik-klonik</button>
@@ -3283,6 +3298,8 @@
       lastSyncedHash=await stateHash(state);
       lastSeenExpiresAt=expiresAt;
       lastSyncTime=Date.now();
+      everSynced=true;
+      updatePrivacyBadge();
       updateAutoSyncStatusLabel();
       codeOut.value=raw.slice(0,4)+'-'+raw.slice(4);
       codeBox.hidden=false;
@@ -3329,6 +3346,8 @@
       lastSyncedHash=await stateHash(state);
       lastSeenExpiresAt=row.expires_at;
       lastSyncTime=Date.now();
+      everSynced=true;
+      updatePrivacyBadge();
       updateAutoSyncStatusLabel();
       document.getElementById('syncForgetLink').hidden=false;
       statusEl.className='sync-status ok';
@@ -3352,6 +3371,24 @@
   let lastSyncedHash=null;
   let lastSeenExpiresAt=null;
   let lastSyncTime=null;
+  let everSynced=false;
+
+  // Üstteki gizlilik rozetini gerçek senkron durumuna göre günceller (yanıltıcı
+  // "veriler çıkmaz" iddiasını önler).
+  function updatePrivacyBadge(){
+    const el=document.getElementById('kvkkBadge');
+    if(!el)return;
+    if(autoSyncEnabled){
+      el.textContent='⚠ Otomatik senkron açık — veriler şifreli sunucuya gönderiliyor';
+      el.title='Form verileri (kimlik içermez) şifrelenip geçici olarak bir sunucuya gönderiliyor.';
+    }else if(everSynced){
+      el.textContent='Senkron kullanıldı — veriler şifreli sunucuya gönderildi';
+      el.title='Bu oturumda en az bir kez veri şifrelenip sunucuya gönderildi.';
+    }else{
+      el.textContent='Veriler cihazdan çıkmaz (senkron kapalı)';
+      el.title='Senkron kullanılmadığı sürece veriler bu cihazdan çıkmaz.';
+    }
+  }
 
   function loadAutoSyncPref(){
     try{return localStorage.getItem(AUTO_SYNC_KEY)==='1';}catch(e){return false;}
@@ -3391,6 +3428,7 @@
     autoSyncEnabled=!!on;
     saveAutoSyncPref(autoSyncEnabled);
     updateAutoSyncUI();
+    updatePrivacyBadge();
     if(autoSyncEnabled){
       startAutoSyncPolling();
     }else{
@@ -3407,6 +3445,7 @@
     autoSyncEnabled=true;
     saveAutoSyncPref(true);
     updateAutoSyncUI();
+    updatePrivacyBadge();
     startAutoSyncPolling();
     toast('Otomatik senkron açıldı: cihazlar arka planda otomatik güncellenecek');
   }
@@ -3452,6 +3491,8 @@
       lastSyncedHash=hash;
       lastSeenExpiresAt=expiresAt;
       lastSyncTime=Date.now();
+      everSynced=true;
+      updatePrivacyBadge();
       updateAutoSyncStatusLabel();
       const codeOut=document.getElementById('syncCodeOut');
       const codeBox=document.getElementById('syncCodeBox');
@@ -3490,6 +3531,8 @@
       applyFormState(state);
       lastSyncedHash=hash;
       lastSyncTime=Date.now();
+      everSynced=true;
+      updatePrivacyBadge();
       updateAutoSyncStatusLabel();
       toast('Otomatik senkron: veriler güncellendi');
     }catch(e){
@@ -3603,6 +3646,7 @@
       startAutoSyncPolling();
     }
     updateAutoSyncUI();
+    updatePrivacyBadge();
   })();
 })();
 </script>
