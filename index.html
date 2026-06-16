@@ -248,16 +248,13 @@
   .score-panel{position:fixed;top:46px;right:0;width:210px;max-height:calc(100vh - 46px);
     overflow-y:auto;background:var(--face);border-left:2px solid var(--shadow);z-index:40;
     padding:8px;box-sizing:border-box;}
-  .score-panel.collapsed{width:30px;padding:8px 4px;overflow:hidden;}
-  .score-panel.collapsed .score-calc{display:none;}
-  .score-panel-toggle{width:100%;border:2px solid;border-color:var(--light) var(--dark) var(--dark) var(--light);
-    box-shadow:inset 1px 1px 0 var(--hl),inset -1px -1px 0 var(--shadow);
-    background:#c0c0c0;color:#000;font:inherit;font-size:11px;font-weight:700;
-    padding:4px 6px;cursor:pointer;border-radius:0;margin-bottom:6px;text-align:center;}
-  .score-panel-toggle:active{border-color:var(--dark) var(--light) var(--light) var(--dark);
-    box-shadow:inset 1px 1px 0 var(--shadow),inset -1px -1px 0 var(--hl);}
-  .score-panel.collapsed .score-panel-toggle{writing-mode:vertical-rl;text-orientation:mixed;
-    padding:6px 2px;height:140px;}
+  .score-section{margin-bottom:4px;}
+  .score-section-toggle{width:100%;text-align:left;
+    background:linear-gradient(90deg,var(--navy),var(--navy2));
+    color:#fff;font-size:11px;font-weight:700;padding:4px 7px;
+    border:none;cursor:pointer;display:flex;justify-content:space-between;
+    align-items:center;font-family:inherit;border-radius:0;margin-bottom:0;}
+  .score-section-toggle .s-arrow{display:inline-block;transition:transform .1s;}
   .score-calc{margin-bottom:6px;border:2px solid;border-color:var(--light) var(--dark) var(--dark) var(--light);
     box-shadow:inset 1px 1px 0 var(--hl),inset -1px -1px 0 var(--shadow);background:#c0c0c0;}
   .score-head{width:100%;text-align:left;background:linear-gradient(90deg,var(--navy),var(--navy2));
@@ -426,30 +423,43 @@
 
 <div class="app-body" id="appBody" style="display:none;">
 <div class="score-panel" id="scorePanel">
-  <button type="button" class="score-panel-toggle" id="scorePanelToggle">Klinik Skorlar</button>
-  <div id="scoreCalcs"></div>
-  <div class="score-calc" id="parklandCalc">
-    <button type="button" class="score-head" onclick="this.closest('.score-calc').classList.toggle('open')">
-      <span>🧮 Hesaplayıcılar</span><span class="arrow">▶</span>
+  <div class="score-section" id="skorSection">
+    <button type="button" class="score-section-toggle" id="skorSectionToggle">
+      <span>📊 Klinik Skorlamalar</span><span class="s-arrow">▶</span>
     </button>
-    <div class="score-body">
-      <div style="font-size:10px;font-weight:700;margin-bottom:6px;text-transform:none;">Yanık Sıvı Resüsitasyonu (Parkland)</div>
-      <div class="score-item">
-        <label style="text-transform:none;">Vücut ağırlığı (kg)</label>
-        <input type="number" id="parkland_kg" min="0" max="300" placeholder="—"
-          style="width:60px;flex:none;font-size:10px;font-family:inherit;border:2px solid;border-color:var(--shadow) var(--light) var(--light) var(--shadow);background:#fff;color:#000;border-radius:0;padding:2px 3px;"
-          oninput="calcParkland()">
-      </div>
-      <div class="score-item" style="margin-top:4px;">
-        <label style="text-transform:none;">Epidermis dışı yanık yüzeyi (%)</label>
-        <input type="number" id="parkland_bsa" min="0" max="100" placeholder="—"
-          style="width:60px;flex:none;font-size:10px;font-family:inherit;border:2px solid;border-color:var(--shadow) var(--light) var(--light) var(--shadow);background:#fff;color:#000;border-radius:0;padding:2px 3px;"
-          oninput="calcParkland()">
-      </div>
-      <div class="score-result" id="parklandResult" style="text-transform:none;font-weight:400;line-height:1.6;margin-top:6px;">
-        <div>İlk 24 saat toplam: <b>—</b></div>
-        <div>İlk 8 saat hızı: <b>—</b></div>
-        <div>Sonraki 16 saat hızı: <b>—</b></div>
+    <div id="skorSectionBody" style="display:none;">
+      <div id="scoreCalcs"></div>
+    </div>
+  </div>
+  <div class="score-section" id="hesapSection">
+    <button type="button" class="score-section-toggle" id="hesapSectionToggle">
+      <span>🧮 Hesaplayıcılar</span><span class="s-arrow">▶</span>
+    </button>
+    <div id="hesapSectionBody" style="display:none;">
+      <div class="score-calc" id="parklandCalc">
+        <button type="button" class="score-head" onclick="this.closest('.score-calc').classList.toggle('open')">
+          <span>Parkland Yanık Sıvısı</span><span class="arrow">▶</span>
+        </button>
+        <div class="score-body">
+          <div style="font-size:10px;font-weight:700;margin-bottom:6px;text-transform:none;">Yanık Sıvı Resüsitasyonu (Parkland)</div>
+          <div class="score-item">
+            <label style="text-transform:none;">Vücut ağırlığı (kg)</label>
+            <input type="number" id="parkland_kg" min="0" max="300" placeholder="—"
+              style="width:60px;flex:none;font-size:10px;font-family:inherit;border:2px solid;border-color:var(--shadow) var(--light) var(--light) var(--shadow);background:#fff;color:#000;border-radius:0;padding:2px 3px;"
+              oninput="calcParkland()">
+          </div>
+          <div class="score-item" style="margin-top:4px;">
+            <label style="text-transform:none;">Epidermis dışı yanık yüzeyi (%)</label>
+            <input type="number" id="parkland_bsa" min="0" max="100" placeholder="—"
+              style="width:60px;flex:none;font-size:10px;font-family:inherit;border:2px solid;border-color:var(--shadow) var(--light) var(--light) var(--shadow);background:#fff;color:#000;border-radius:0;padding:2px 3px;"
+              oninput="calcParkland()">
+          </div>
+          <div class="score-result" id="parklandResult" style="text-transform:none;font-weight:400;line-height:1.6;margin-top:6px;">
+            <div>İlk 24 saat toplam: <b>—</b></div>
+            <div>İlk 8 saat hızı: <b>—</b></div>
+            <div>Sonraki 16 saat hızı: <b>—</b></div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -4013,17 +4023,19 @@
       card.querySelector('.score-head').addEventListener('click',()=>card.classList.toggle('open'));
       holder.appendChild(card);
     });
-    const toggle=document.getElementById('scorePanelToggle');
-    const panel=document.getElementById('scorePanel');
-    if(toggle&&panel){
-      toggle.addEventListener('click',()=>{
-        panel.classList.toggle('collapsed');
-        const wrap=document.querySelector('.wrap');
-        if(wrap&&window.innerWidth>900){
-          wrap.style.paddingRight=panel.classList.contains('collapsed')?'35px':'215px';
-        }
+    function bindSectionToggle(toggleId,bodyId){
+      const btn=document.getElementById(toggleId);
+      const body=document.getElementById(bodyId);
+      if(!btn||!body)return;
+      btn.addEventListener('click',function(){
+        const open=body.style.display==='none';
+        body.style.display=open?'block':'none';
+        const arrow=btn.querySelector('.s-arrow');
+        if(arrow)arrow.style.transform=open?'rotate(90deg)':'';
       });
     }
+    bindSectionToggle('skorSectionToggle','skorSectionBody');
+    bindSectionToggle('hesapSectionToggle','hesapSectionBody');
   }
   /* ===== Parkland Hesaplayici ===== */
   function calcParkland(){
@@ -4040,6 +4052,7 @@
     const h16=Math.round(total/32);
     r.innerHTML=`<div>İlk 24 saat toplam: <b>${Math.round(total)} mL</b></div><div>İlk 8 saat hızı: <b>${h8} mL/sa</b></div><div>Sonraki 16 saat hızı: <b>${h16} mL/sa</b></div>`;
   }
+  window.calcParkland=calcParkland;
 
   buildScorePanel();
 
