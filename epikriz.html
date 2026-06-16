@@ -4052,6 +4052,7 @@
     const h16=Math.round(total/32);
     r.innerHTML=`<div>İlk 24 saat toplam: <b>${Math.round(total)} mL</b></div><div>İlk 8 saat hızı: <b>${h8} mL/sa</b></div><div>Sonraki 16 saat hızı: <b>${h16} mL/sa</b></div>`;
   }
+  window.calcParkland=calcParkland;
 
   buildScorePanel();
 

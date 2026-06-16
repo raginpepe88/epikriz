@@ -1,0 +1,43 @@
+# Acil Epikriz — Proje Notları
+
+**Amaç:** Acil servis hekiminin hızlıca kutu işaretleyerek profesyonel bir epikriz / hasta notu üretmesini sağlayan araç. Hedef: önce web, sonra iOS App Store uygulaması.
+
+**Ana dosya:** `epikriz.html` (tek dosya — HTML + CSS + JS, harici bağımlılık yok)
+
+---
+
+## Değişmez kurallar (bunları bozma)
+
+1. **Şablon temelli.** Yapay zekâ ile metin üretimi YOK. Hekim ne işaretlerse o yazıya dökülür; araç asla klinik içerik uydurmaz/eklemez. Halüsinasyon riski sıfır olmalı.
+2. **Tüm işlem tarayıcıda (client-side).** Hasta verisi hiçbir sunucuya/ API'ye gitmez. KVKK gereği bu kritik. Hiçbir veri toplama, çağrı, depolama eklenmemeli.
+3. **Türkçe** arayüz ve çıktı. Tüm tıbbi terminoloji Türkçe acil pratiğine uygun.
+4. **Hız her şeyden önce gelir.** Araç bir hekimin saniyeler içinde tıklayıp epikriz çıkarması için var. Bir özellik tıklama sayısını/karmaşıklığı artırıyorsa, gözden geçir.
+
+## Mevcut durum
+
+- Sol panel: işaretlenecek bölümler. Sağ panel: canlı oluşan epikriz önizlemesi.
+- Bölümler: Hasta, Başvuru Şikayeti, Hikaye, Bilinen Hastalıklar, Alerji, Vital Bulgular (+EKG), Fizik Muayene, Uygulanan Tedavi, Karar, Öneriler.
+- **Dinamik detay panelleri:** bir şikayet seçilince (ör. göğüs ağrısı) altında ona özel sorular açılıyor (süre, nitelik, efor ilişkisi vb.). Veri yapısı `followups` objesinde; yeni şikayet eklemek kolay.
+- "Karar" seçimi otomatik tam cümle kuruyor (taburcu/yatış/sevk/konsültasyon).
+- Kopyala (HBYS'ye yapıştırmak için) ve Yazdır butonları var.
+- **Görünüm:** Windows 98 estetiği — gri zemin, Arial, kabarık 3D bevel butonlar, lacivert başlık çubukları, seçili kutularda ✓.
+
+## Sıradaki iş: Bates muayene içeriği
+
+Yüklenen kaynak: Bates' Guide to Physical Examination (PDF).
+
+**Dikkat — "her şeyi ekle" tuzağı:** Bates ~1000 sayfa. Hepsini düz checkbox'a dökmek aracı yavaşlatır ve hız avantajını yok eder. Doğru yaklaşım:
+
+- Sisteme göre düzenlenmiş (kardiyovasküler, solunum, batın, nörolojik, kas-iskelet, baş-boyun vb.) **derin ama katlanabilir (collapsible)** bir muayene modülü.
+- Varsayılan görünüm sade kalsın; hekim istediği sistemi açınca o sistemin ayrıntılı normal/patolojik bulgu seçenekleri gelsin.
+- Normal bulgular tek tıkla toplu işaretlenebilsin ("tümü doğal" gibi), sonra hekim sapanları değiştirsin.
+- Terminoloji ve sınıflandırma Bates'e sadık; ama çıktı acil epikriz diline uygun, kısa.
+
+## Uzak hedef: iOS App Store
+
+- Web → iOS için muhtemelen Capacitor (mevcut HTML'i sarmalar) veya Flutter.
+- Gerekenler: Apple Developer hesabı (99 $/yıl), Mac + Xcode, gizlilik politikası URL'si, tıbbi uygulama incelemesi için net sorumluluk reddi ("klinik karar destek aracıdır, hekim muhakemesinin yerini almaz").
+
+## Güvenlik notu
+
+Cowork/Code'un "computer use" özelliğini HBYS'ye veya gerçek hasta verisi olan sistemlere BAĞLAMA. Geliştirme tamamen yerel dosya üzerinde yapılır; gerçek hasta verisi kullanılmaz.
