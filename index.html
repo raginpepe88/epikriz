@@ -357,6 +357,14 @@
     border-color:var(--light) var(--dark) var(--dark) var(--light);color:#000;}
   .score-add:active{border-color:var(--dark) var(--light) var(--light) var(--dark);}
   .score-add.added{background:#d7f0d7;border-color:#3a7a3a;color:#1a5a1a;}
+  .icd-sub{font-size:9.5px;font-weight:700;color:#fff;background:var(--navy2);padding:2px 5px;margin:7px 0 3px;text-transform:none;}
+  .icd-chips,.icd-results{display:flex;flex-direction:column;gap:3px;}
+  .icd-results{max-height:150px;overflow:auto;margin-top:4px;}
+  .icd-chip{display:block;width:100%;box-sizing:border-box;text-align:left;font-family:inherit;font-size:10px;line-height:1.25;
+    padding:3px 5px;border:2px solid;border-color:var(--light) var(--dark) var(--dark) var(--light);
+    background:#fff;color:#000;border-radius:0;}
+  .icd-empty{font-size:9.5px;color:#555;font-style:italic;padding:1px 2px;}
+  .icd-note{font-size:9px;color:#444;font-style:italic;line-height:1.3;margin-bottom:5px;}
 
   /* Senkronizasyon modali */
   .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:200;
@@ -560,6 +568,21 @@
 
 <div class="app-body" id="appBody" style="display:none;">
 <div class="score-panel" id="scorePanel">
+  <div class="score-section" id="taniSection">
+    <button type="button" class="score-section-toggle" id="taniSectionToggle">
+      <span>🏷️ ICD-10 Öneri</span><span class="s-arrow">▶</span>
+    </button>
+    <div id="taniSectionBody" style="display:none;">
+      <div style="padding:6px 7px;">
+        <div class="icd-note">Yalnızca klinisyene öneridir; epikrize kopyalanmaz.</div>
+        <input type="text" id="icdSearch" placeholder="ICD kodu / tanı ara…" autocomplete="off"
+          style="width:100%;box-sizing:border-box;font-size:10.5px;font-family:inherit;border:2px solid;border-color:var(--shadow) var(--light) var(--light) var(--shadow);background:#fff;color:#000;padding:3px 5px;border-radius:0;">
+        <div id="icdSearchResults" class="icd-results"></div>
+        <div class="icd-sub">Olası kodlar (şikayet + muayene)</div>
+        <div id="icdSuggest" class="icd-chips"><span class="icd-empty">Şikayet/muayene işaretleyin…</span></div>
+      </div>
+    </div>
+  </div>
   <div class="score-section" id="skorSection">
     <button type="button" class="score-section-toggle" id="skorSectionToggle">
       <span>📊 Klinik Skorlamalar</span><span class="s-arrow">▶</span>
@@ -615,6 +638,53 @@
             <div>Kafsız: <b>—</b></div>
           </div>
           <div style="font-size:9px;color:#555;margin-top:5px;text-transform:none;line-height:1.4;">&#9888; Yalnızca 1-8 yaş için geçerlidir.</div>
+        </div>
+      </div>
+      <div class="score-calc" id="naCorrCalc">
+        <button type="button" class="score-head" onclick="this.closest('.score-calc').classList.toggle('open')">
+          <span>🧂 Düzeltilmiş Sodyum</span><span class="arrow">▶</span>
+        </button>
+        <div class="score-body">
+          <div style="font-size:10px;font-weight:700;margin-bottom:6px;text-transform:none;">Hiperglisemide düzeltilmiş Na</div>
+          <div class="score-item">
+            <label style="text-transform:none;">Ölçülen Na (mmol/L)</label>
+            <input type="number" id="nacorr_na" placeholder="—" style="width:60px;flex:none;font-size:10px;font-family:inherit;border:2px solid;border-color:var(--shadow) var(--light) var(--light) var(--shadow);background:#fff;color:#000;border-radius:0;padding:2px 3px;" oninput="calcNaCorr()">
+          </div>
+          <div class="score-item" style="margin-top:4px;">
+            <label style="text-transform:none;">Glukoz (mg/dL)</label>
+            <input type="number" id="nacorr_glu" placeholder="—" style="width:60px;flex:none;font-size:10px;font-family:inherit;border:2px solid;border-color:var(--shadow) var(--light) var(--light) var(--shadow);background:#fff;color:#000;border-radius:0;padding:2px 3px;" oninput="calcNaCorr()">
+          </div>
+          <div class="score-result" id="naCorrResult" style="text-transform:none;font-weight:400;line-height:1.6;margin-top:6px;">
+            <div>Düzeltilmiş Na (×1,6 Katz): <b>—</b></div>
+            <div>Düzeltilmiş Na (×2,4 Hillier): <b>—</b></div>
+          </div>
+        </div>
+      </div>
+      <div class="score-calc" id="anionGapCalc">
+        <button type="button" class="score-head" onclick="this.closest('.score-calc').classList.toggle('open')">
+          <span>🧪 Anyon Açığı</span><span class="arrow">▶</span>
+        </button>
+        <div class="score-body">
+          <div style="font-size:10px;font-weight:700;margin-bottom:6px;text-transform:none;">Anyon açığı = Na − (Cl + HCO₃)</div>
+          <div class="score-item">
+            <label style="text-transform:none;">Na (mmol/L)</label>
+            <input type="number" id="ag_na" placeholder="—" style="width:60px;flex:none;font-size:10px;font-family:inherit;border:2px solid;border-color:var(--shadow) var(--light) var(--light) var(--shadow);background:#fff;color:#000;border-radius:0;padding:2px 3px;" oninput="calcAnionGap()">
+          </div>
+          <div class="score-item" style="margin-top:4px;">
+            <label style="text-transform:none;">Cl (mmol/L)</label>
+            <input type="number" id="ag_cl" placeholder="—" style="width:60px;flex:none;font-size:10px;font-family:inherit;border:2px solid;border-color:var(--shadow) var(--light) var(--light) var(--shadow);background:#fff;color:#000;border-radius:0;padding:2px 3px;" oninput="calcAnionGap()">
+          </div>
+          <div class="score-item" style="margin-top:4px;">
+            <label style="text-transform:none;">HCO₃ (mmol/L)</label>
+            <input type="number" id="ag_hco3" placeholder="—" style="width:60px;flex:none;font-size:10px;font-family:inherit;border:2px solid;border-color:var(--shadow) var(--light) var(--light) var(--shadow);background:#fff;color:#000;border-radius:0;padding:2px 3px;" oninput="calcAnionGap()">
+          </div>
+          <div class="score-item" style="margin-top:4px;">
+            <label style="text-transform:none;">Albümin (g/dL) — opsiyonel</label>
+            <input type="number" id="ag_alb" placeholder="—" style="width:60px;flex:none;font-size:10px;font-family:inherit;border:2px solid;border-color:var(--shadow) var(--light) var(--light) var(--shadow);background:#fff;color:#000;border-radius:0;padding:2px 3px;" oninput="calcAnionGap()">
+          </div>
+          <div class="score-result" id="anionGapResult" style="text-transform:none;font-weight:400;line-height:1.6;margin-top:6px;">
+            <div>Anyon açığı: <b>—</b></div>
+          </div>
         </div>
       </div>
     </div>
@@ -1202,7 +1272,7 @@
           <option value="105">105</option>
           <option value="110">110</option>
           <option value="115">115</option>
-          <option value="120" selected>120</option>
+          <option value="120">120</option>
           <option value="125">125</option>
           <option value="130">130</option>
           <option value="135">135</option>
@@ -1239,7 +1309,7 @@
           <option value="65">65</option>
           <option value="70">70</option>
           <option value="75">75</option>
-          <option value="80" selected>80</option>
+          <option value="80">80</option>
           <option value="85">85</option>
           <option value="90">90</option>
           <option value="95">95</option>
@@ -1283,7 +1353,7 @@
 <option value="77">77</option>
 <option value="78">78</option>
 <option value="79">79</option>
-<option value="80" selected>80</option>
+<option value="80">80</option>
 <option value="81">81</option>
 <option value="82">82</option>
 <option value="83">83</option>
@@ -1375,7 +1445,7 @@
 <option value="35.0">35.0</option>
 <option value="35.5">35.5</option>
 <option value="36.0">36.0</option>
-<option value="36.5" selected>36.5</option>
+<option value="36.5">36.5</option>
 <option value="37.0">37.0</option>
 <option value="37.5">37.5</option>
 <option value="38.0">38.0</option>
@@ -1417,7 +1487,7 @@
 <option value="95">95</option>
 <option value="96">96</option>
 <option value="97">97</option>
-<option value="98" selected>98</option>
+<option value="98">98</option>
 <option value="99">99</option>
 <option value="100">100</option>
         </select></div>
@@ -1434,7 +1504,7 @@
 <option value="13">13</option>
 <option value="14">14</option>
 <option value="15">15</option>
-<option value="16" selected>16</option>
+<option value="16">16</option>
 <option value="17">17</option>
 <option value="18">18</option>
 <option value="19">19</option>
@@ -1699,6 +1769,7 @@
       <div class="sec-label"><span class="num">06</span> Alerji</div>
       <div class="chips">
         <button class="chip neg" data-clears="true">bilinen alerjisi yok</button>
+        <button class="chip neg" data-clears="true">bilinen ilaç alerjisi yok</button>
         <button class="chip">Penisilin</button>
         <button class="chip">Aspirin/NSAİİ</button>
         <button class="chip">Kontrast madde</button>
@@ -2175,6 +2246,9 @@
         <button class="chip">Konsültasyon</button>
         <button class="chip">Ameliyathaneye alındı</button>
         <button class="chip">Exitus</button>
+      </div>
+      <div class="chips">
+        <button class="chip" data-semptomatik="true">Semptomatik tedavi ile geriledi</button>
       </div>
       <input class="extra" data-extra placeholder="Branş / hedef klinik (örn. Dahiliye)">
     </div>
@@ -13233,7 +13307,7 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
     const g=val('f_gks_goz'),m=val('f_gks_motor'),vb=val('f_gks_verbal');
     if(g&&m&&vb){
       const total=Math.min(Number(g)+Number(m)+Number(vb),15);
-      return `GKS: ${total}/15 (Göz ${g}, Motor ${m}, Verbal ${vb})`;
+      return `${total}/15 (Göz ${g}, Motor ${m}, Verbal ${vb})`;
     }
     return '';
   }
@@ -14305,24 +14379,31 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
 
   function dispoSentence(){
     const k=form.querySelector('[data-field="karar"]');
-    const sel=k.querySelector('.chip.active');
+    const sel=k.querySelector('.chips[data-single] .chip.active');
     const target=k.querySelector('[data-extra]').value.trim();
-    if(!sel)return '';
-    const t=sel.textContent.trim();
-    if(t==='Taburcu')return `Genel durumu iyi, vital bulguları stabil olan hasta önerilerle taburcu edildi.`;
-    if(t==='Servise yatış')return `Hasta ileri tetkik ve tedavi amacıyla ${target||'ilgili'} servisine yatırıldı.`;
-    if(t==='Yoğun bakıma yatış')return `Hasta ileri takip ve tedavi amacıyla ${target||'ilgili'} yoğun bakım ünitesine yatırıldı.`;
-    if(t==='Sevk')return `Hasta ileri tetkik/tedavi amacıyla ${target||'ilgili merkeze'} sevk edildi.`;
-    if(t==='Konsültasyon')return `${target||'İlgili branş'} konsültasyonu istendi.`;
-    if(t==='Ameliyathaneye alındı')return `Hasta acil cerrahi girişim amacıyla ${target||'ilgili'} ameliyathaneye alındı.`;
-    if(t==='Exitus')return `Hastaya yapılan tüm girişimlere rağmen yaşamını kaybetti (exitus).`;
-    return t;
+    const semptomatik=k.querySelector('.chip[data-semptomatik].active');
+    const parts=[];
+    if(semptomatik)parts.push('Aktif şikayetleri semptomatik tedavi ile gerileyen hasta için taburculuk planlandı.');
+    if(sel){
+      const t=sel.textContent.trim();
+      if(t==='Taburcu'){ if(!semptomatik)parts.push('Genel durumu iyi, vital bulguları stabil olan hasta önerilerle taburcu edildi.'); }
+      else if(t==='Servise yatış')parts.push(`Hasta ileri tetkik ve tedavi amacıyla ${target||'ilgili'} servisine yatırıldı.`);
+      else if(t==='Yoğun bakıma yatış')parts.push(`Hasta ileri takip ve tedavi amacıyla ${target||'ilgili'} yoğun bakım ünitesine yatırıldı.`);
+      else if(t==='Sevk')parts.push(`Hasta ileri tetkik/tedavi amacıyla ${target||'ilgili merkeze'} sevk edildi.`);
+      else if(t==='Konsültasyon')parts.push(`${target||'İlgili branş'} konsültasyonu istendi.`);
+      else if(t==='Ameliyathaneye alındı')parts.push(`Hasta acil cerrahi girişim amacıyla ${target||'ilgili'} ameliyathaneye alındı.`);
+      else if(t==='Exitus')parts.push('Hastaya yapılan tüm girişimlere rağmen yaşamını kaybetti (exitus).');
+      else parts.push(t);
+    }
+    return parts.join(' ');
   }
 
   let lastText='';
   // Epikrize "✅" ile eklenen klinik skorlar (id -> {name, get:()=>metin}); render() bunları "Klinik Skorlar" satırına basar.
   const includedScores=new Set();
   const scoreGetters=new Map();
+  const scoreAddSyncers=[]; // her skor kartının "✅" buton senkron fonksiyonu — restore'da topluca çağrılır
+  function syncAllScoreAdds(){ scoreAddSyncers.forEach(fn=>{try{fn();}catch(e){}}); }
   function clinicalScoresText(){
     const out=[];
     includedScores.forEach(scoreId=>{
@@ -14332,6 +14413,111 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
       if(t)out.push(`${g.name}: ${t}`);
     });
     return out.join(' | ');
+  }
+
+  /* ===== ICD-10 Tanı önerisi (başvuru şikayeti + fizik muayene bulgusuna göre) ===== */
+  const ICD_NAMES={
+    'R52':'Ağrı, başka yerde sınıflandırılmamış','R50.9':'Ateş, tanımlanmamış','R61':'Hiperhidroz (terleme)',
+    'R53':'Halsizlik ve yorgunluk','T50.9':'İlaç/madde zehirlenmesi, tanımlanmamış','R63.0':'Anoreksi (iştahsızlık)',
+    'R63.4':'Anormal kilo kaybı','R60.9':'Ödem, tanımlanmamış','R55':'Senkop ve kollaps','R60.0':'Lokalize ödem',
+    'I80.2':'Alt ekstremite derin ven trombozu','R00.2':'Palpitasyon (çarpıntı)','R07.4':'Göğüs ağrısı, tanımlanmamış',
+    'I20.0':'Anstabil anjina pektoris','I20.9':'Anjina pektoris, tanımlanmamış','I21.9':'Akut miyokard enfarktüsü',
+    'I73.9':'Periferik vasküler hastalık','I10':'Esansiyel (primer) hipertansiyon','R03.0':'Yüksek kan basıncı okuması (HT tanısı yok)',
+    'R06.2':'Hırıltılı solunum (wheezing)','J45.9':'Astım, tanımlanmamış','R04.2':'Hemoptizi','R06.0':'Dispne (nefes darlığı)',
+    'J44.9':'KOAH, tanımlanmamış','I50.9':'Kalp yetmezliği, tanımlanmamış','J18.9':'Pnömoni, etken tanımlanmamış','R05':'Öksürük',
+    'R51':'Baş ağrısı','G43.9':'Migren, tanımlanmamış','R42':'Baş dönmesi ve sersemlik','R41.0':'Oryantasyon bozukluğu',
+    'R27.0':'Ataksi','R29.8':'Sinir/kas-iskelet sistemine ait diğer belirtiler','G81.9':'Hemipleji, tanımlanmamış',
+    'I63.9':'Serebral enfarktüs, tanımlanmamış','H54.7':'Görme kaybı, tanımlanmamış','R47.0':'Disfazi ve afazi',
+    'R47.1':'Dizartri ve anartri','R56.9':'Konvülziyon, tanımlanmamış','G40.9':'Epilepsi, tanımlanmamış','R20.2':'Parestezi (uyuşma)',
+    'H57.1':'Göz ağrısı','H10.9':'Konjonktivit, tanımlanmamış','T15.9':'Gözde yabancı cisim','J02.9':'Akut farenjit',
+    'R07.0':'Boğazda ağrı','R04.0':'Epistaksis (burun kanaması)','R13.10':'Disfaji','H91.9':'İşitme kaybı, tanımlanmamış',
+    'H92.0':'Otalji (kulak ağrısı)','R49.0':'Disfoni (ses kısıklığı)','H81.1':'Benign paroksismal vertigo','R11.2':'Bulantı ile kusma',
+    'K92.2':'Gastrointestinal kanama, tanımlanmamış','A09':'İnfeksiyöz gastroenterit/kolit (ishal)','K59.0':'Konstipasyon',
+    'K92.1':'Melena','K62.5':'Anüs/rektum kanaması','R10.4':'Karın ağrısı, tanımlanmamış','K35.80':'Akut apandisit',
+    'K80.20':'Safra kesesi taşı (kolelitiazis)','K85.9':'Akut pankreatit','R10.2':'Pelvik ve perineal ağrı','R17':'Sarılık',
+    'R30.0':'Dizüri','N39.0':'İdrar yolu enfeksiyonu','R36.9':'Üretral akıntı','N89.8':'Vajinal akıntı/noninflamatuar bozukluk',
+    'R31.9':'Hematüri, tanımlanmamış','N20.9':'Üriner sistem taşı','R33.9':'Üriner retansiyon','N44':'Testis torsiyonu',
+    'N45.9':'Orşit ve epididimit','N93.9':'Anormal uterin/vajinal kanama','O36.8':'Azalmış fetal hareket için bakım',
+    'Z33.1':'Gebe durumu (gebelik şüphesi)','O20.9':'Erken gebelik kanaması','O47.9':'Yalancı doğum eylemi',
+    'M54.5':'Bel ağrısı (lumbago)','M51.2':'İntervertebral disk yer değiştirmesi','M25.50':'Eklem ağrısı','M25.40':'Eklemde efüzyon',
+    'M54.9':'Dorsalji (sırt ağrısı)','M54.6':'Torakal omurga ağrısı','W19':'Tanımlanmamış düşme','S05.9':'Göz/orbita yaralanması',
+    'T14.1':'Açık yara, tanımlanmamış bölge','W55.9':'Memeli hayvan ısırığı/teması','Z20.3':'Kuduza maruz kalma/temas',
+    'S09.9':'Kafa yaralanması, tanımlanmamış','S06.0':'Konküzyon (beyin sarsıntısı)','V89.2':'Motorlu taşıt (trafik) kazası',
+    'T14.9':'Yaralanma, tanımlanmamış','T17.9':'Solunum yolunda yabancı cisim','T18.9':'Sindirim sisteminde yabancı cisim',
+    'T30.0':'Yanık, bölge/derece tanımlanmamış','R45.1':'Huzursuzluk ve ajitasyon','F41.9':'Anksiyete bozukluğu','F22':'Hezeyanlı (delüzyonel) bozukluk',
+    'F29':'Tanımlanmamış nonorganik psikoz','R44.3':'Halüsinasyon, tanımlanmamış','R45.851':'İntihar düşünceleri','F41.0':'Panik bozukluğu',
+    'F10.0':'Akut alkol intoksikasyonu','T51.0':'Etanolün toksik etkisi','F19.0':'Çoklu madde intoksikasyonu','T58':'Karbonmonoksit toksik etkisi',
+    'R73.9':'Hiperglisemi, tanımlanmamış','E14.9':'Diabetes mellitus, tanımlanmamış','E10.1':'Tip 1 DM, ketoasidozla (DKA)',
+    'E16.2':'Hipoglisemi, tanımlanmamış','L02.9':'Kütanöz apse/furonkül','L03.90':'Selülit, tanımlanmamış','L08.9':'Lokal deri enfeksiyonu',
+    'R21':'Döküntü/nonspesifik deri erüpsiyonu','L50.9':'Ürtiker','T78.4':'Alerji, tanımlanmamış','L29.9':'Kaşıntı (pruritus)',
+    'R23.0':'Siyanoz','T14.2':'Kırık, tanımlanmamış bölge','G51.0':'Bell paralizisi','N10':'Akut pyelonefrit','K65.9':'Peritonit','J20.9':'Akut bronşit'
+  };
+  const ICD_BY_COMPLAINT={
+    'akut ağrı (lokalize edilemeyen)':['R52'],'ateş':['R50.9'],'gece terlemesi':['R61'],'genel durum bozukluğu':['R53'],'halsizlik':['R53'],
+    'ilaç/madde alımı':['T50.9'],'iştahsızlık':['R63.0'],'kilo kaybı':['R63.4'],'ödem':['R60.9'],'presenkop':['R55'],
+    'bacakta şişlik':['R60.0','I80.2'],'çarpıntı':['R00.2'],'göğüs ağrısı':['R07.4','I20.0','I20.9','I21.9'],'göğüste sıkışma hissi':['R07.4','I20.9'],
+    'senkop':['R55'],'soğuk ekstremite':['I73.9'],'yüksek tansiyon':['I10','R03.0'],'hırıltılı nefes':['R06.2','J45.9'],'kanlı balgam':['R04.2'],
+    'nefes darlığı':['R06.0','J44.9','I50.9','J18.9'],'öksürük':['R05'],'baş ağrısı':['R51','G43.9'],'baş dönmesi':['R42'],'bilinç bulanıklığı':['R41.0'],
+    'denge kaybı':['R42','R27.0'],'ekstremite güçsüzlüğü':['R29.8','G81.9','I63.9'],'görme kaybı':['H54.7'],'konuşma bozukluğu':['R47.0','R47.1'],
+    'Nöbet':['R56.9','G40.9'],'uyuşma':['R20.2'],'ani görme azalması':['H54.7'],'göz ağrısı':['H57.1'],'kızarıklık':['H10.9','H57.1'],
+    'yabancı cisim hissi':['T15.9'],'boğaz ağrısı':['J02.9','R07.0'],'burun kanaması':['R04.0'],'disfaji':['R13.10'],'işitme kaybı':['H91.9'],
+    'kulak ağrısı':['H92.0'],'ses kısıklığı':['R49.0'],'vertigo':['H81.1','R42'],'bulantı-kusma':['R11.2'],'GİS kanama':['K92.2'],'ishal':['A09'],
+    'kabızlık':['K59.0'],'kanlı dışkılama':['K92.1','K62.5'],'karın ağrısı':['R10.4','K35.80','K80.20','K85.9'],'rektal ağrı':['R10.2','K62.5'],
+    'sarılık':['R17'],'dizüri':['R30.0','N39.0'],'genital akıntı':['R36.9','N89.8'],'hematüri':['R31.9','N20.9'],'idrar yapamama':['R33.9'],
+    'pelvik ağrı':['R10.2'],'testis ağrısı':['N44','N45.9'],'vajinal kanama':['N93.9'],'fetal hareket azalması':['O36.8'],'gebelik şüphesi':['Z33.1'],
+    'gebelikte kanama':['O20.9'],'kasılma':['O47.9'],'bel ağrısı':['M54.5','M51.2'],'eklem ağrısı/şişlik':['M25.50','M25.40'],'sırt ağrısı':['M54.9','M54.6'],
+    'düşme':['W19','T14.9'],'göz travması':['S05.9'],'hayvan ısırığı':['T14.1','W55.9','Z20.3'],'kafa travması':['S09.9','S06.0'],'kesik/laserasyon':['T14.1'],
+    'trafik kazası':['V89.2','T14.9'],'travma':['T14.9'],'yabancı cisim':['T17.9','T18.9','T15.9'],'yanık':['T30.0'],'yanık derecelendirme ihtiyacı':['T30.0'],
+    'ajitasyon':['R45.1'],'anksiyete':['F41.9'],'delüzyon':['F22','F29'],'halüsinasyon':['R44.3','F29'],'intihar düşüncesi':['R45.851'],'panik atak':['F41.0'],
+    'Alkol kullanımı':['F10.0','T51.0'],'Madde kullanımı':['F19.0'],'CO maruziyeti şüphesi':['T58'],'ilaç intoksikasyonu':['T50.9'],
+    'hiperglisemi':['R73.9','E14.9','E10.1'],'hipoglisemi':['E16.2'],'apse':['L02.9'],'cilt enfeksiyonu':['L03.90','L08.9'],
+    'döküntü/alerji':['R21','L50.9','T78.4'],'kaşıntı':['L29.9']
+  };
+  const ICD_BY_FINDING={
+    'Wheezing':['J45.9','J44.9'],'Ronküs':['J44.9','J20.9'],'İnce raller':['J18.9','I50.9'],'Kaba raller':['J18.9'],
+    'Lokalize hassasiyet':['K35.80','R10.4'],'Defans':['K65.9','K35.80'],'Rebound hassasiyet':['K65.9','K35.80'],'KVA hassasiyeti (+)':['N20.9','N10'],
+    'Laserasyon / abrazyon':['T14.1'],'Deformite / anormal pozisyon':['T14.2'],'Lokalize kemik hassasiyeti':['T14.2'],'Açık yara / kemikte açıklık':['T14.1','T14.2'],
+    'Hemiparezi / hemipleji':['I63.9','G81.9'],'Fasiyal asimetri / paralizi':['G51.0','I63.9'],'Siyanoz':['R23.0']
+  };
+  function icdLabel(code){return `${code} — ${ICD_NAMES[code]||''}`;}
+  function icdActiveComplaints(){
+    const s=document.querySelector('[data-field="sikayet"]');
+    if(!s)return [];
+    return [...s.querySelectorAll('.chip.active')].filter(c=>!c.closest('.detay-wrap')).map(c=>c.textContent.trim());
+  }
+  function icdActiveFindings(){
+    const m=document.getElementById('examWrap');
+    if(!m)return [];
+    return [...m.querySelectorAll('.chip.active')].filter(c=>!c.closest('.exam-extra')&&!c.dataset.normal).map(c=>c.textContent.trim());
+  }
+  function icdSuggestions(){
+    const codes=[]; const add=c=>{if(c&&ICD_NAMES[c]&&!codes.includes(c))codes.push(c);};
+    icdActiveComplaints().forEach(t=>(ICD_BY_COMPLAINT[t]||[]).forEach(add));
+    icdActiveFindings().forEach(t=>(ICD_BY_FINDING[t]||[]).forEach(add));
+    return codes;
+  }
+  function icdItem(code){
+    const d=document.createElement('div');
+    d.className='icd-chip';
+    d.textContent=icdLabel(code);
+    d.title=icdLabel(code);
+    return d;
+  }
+  function refreshIcdSuggestions(){
+    const host=document.getElementById('icdSuggest'); if(!host)return;
+    const codes=icdSuggestions();
+    host.innerHTML='';
+    if(!codes.length){host.innerHTML='<span class="icd-empty">Şikayet/muayene işaretleyin…</span>';return;}
+    codes.forEach(c=>host.appendChild(icdItem(c)));
+  }
+  function icdSearch(q){
+    const host=document.getElementById('icdSearchResults'); if(!host)return;
+    q=(q||'').trim().toLocaleLowerCase('tr');
+    host.innerHTML='';
+    if(q.length<2)return;
+    const hits=Object.keys(ICD_NAMES).filter(c=>(c+' '+ICD_NAMES[c]).toLocaleLowerCase('tr').includes(q)).slice(0,30);
+    if(!hits.length){host.innerHTML='<span class="icd-empty">Eşleşme yok.</span>';return;}
+    hits.forEach(c=>host.appendChild(icdItem(c)));
   }
 
   // --- Hasta gecmisi / oturum bellegi (sadece JS bellekte, kalici depolama YOK) ---
@@ -14540,6 +14726,7 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
     return {
       chips, inputs, examOpen,
       lezyon:captureLezyonCards(),
+      scores:[...includedScores],
       time:`${pad(d.getHours())}:${pad(d.getMinutes())}`,
     };
   }
@@ -14569,13 +14756,16 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
       if(tog)tog.textContent=open?'−':'+';
     });
     restoreLezyonCards(st.lezyon);
+    includedScores.clear(); (st.scores||[]).forEach(id=>includedScores.add(id));
+    syncAllScoreAdds(); refreshIcdSuggestions();
   }
 
   function isStateEmpty(st){
     const chips=st.chips||{}, inputs=st.inputs||{};
     return !Object.values(chips).some(Boolean)
       && !Object.values(inputs).some(v=>v&&v.trim())
-      && !(st.lezyon&&st.lezyon.length);
+      && !(st.lezyon&&st.lezyon.length)
+      && !(st.scores&&st.scores.length);
   }
 
   function renderPatientTabs(){
@@ -14611,6 +14801,7 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
   function render(){
     updateCatCounts();
     updateExamBadges();
+    refreshIcdSuggestions();
     updateOzgecmisExtras();
     updateEkgExtras();
     updateExamExtras();
@@ -14783,6 +14974,8 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
       if(tog)tog.textContent='+';
     });
     activeIndex=null;
+    includedScores.clear();
+    syncAllScoreAdds();
     setGksDefaults();
     renderPatientTabs();
     refreshDetail();render();
@@ -15200,6 +15393,7 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
         render();
       });
       syncAddBtn();
+      scoreAddSyncers.push(syncAddBtn);
       body.appendChild(addBtn);
       // CHA2DS2-VASc yaş seçenekleri mutual exclusion (≥75 ve 65-74 aynı anda seçilemez)
       if(def.id==='chads'){
@@ -15227,6 +15421,10 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
     bindSectionToggle('skorSectionToggle','skorSectionBody');
     bindSectionToggle('hesapSectionToggle','hesapSectionBody');
     bindSectionToggle('yonlendirmeSectionToggle','yonlendirmeSectionBody');
+    bindSectionToggle('taniSectionToggle','taniSectionBody');
+    const icdSearchEl=document.getElementById('icdSearch');
+    if(icdSearchEl)icdSearchEl.addEventListener('input',()=>icdSearch(icdSearchEl.value));
+    refreshIcdSuggestions();
   }
   /* ===== Parasetamol (Asetaminofen) Klinik Yonlendirme — kaynak: UpToDate Management (Apr 2026) ===== */
   function calcParasetamol(){
@@ -15324,6 +15522,46 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
     r.innerHTML=`<div>Kaflı: <b>${cuffed} mm</b></div><div>Kafsız: <b>${uncuffed} mm</b></div>`;
   }
   window.calcEtt=calcEtt;
+
+  /* ===== Düzeltilmiş Sodyum (hiperglisemi) ===== */
+  function calcNaCorr(){
+    const na=parseFloat(document.getElementById('nacorr_na')?.value);
+    const glu=parseFloat(document.getElementById('nacorr_glu')?.value);
+    const r=document.getElementById('naCorrResult');
+    if(!r)return;
+    if(isNaN(na)||isNaN(glu)){
+      r.innerHTML='<div>Düzeltilmiş Na (×1,6 Katz): <b>—</b></div><div>Düzeltilmiş Na (×2,4 Hillier): <b>—</b></div>';
+      return;
+    }
+    const c16=na+1.6*(glu-100)/100;
+    const c24=na+2.4*(glu-100)/100;
+    r.innerHTML=`<div>Düzeltilmiş Na (×1,6 Katz): <b>${c16.toFixed(1)} mmol/L</b></div>`+
+      `<div>Düzeltilmiş Na (×2,4 Hillier): <b>${c24.toFixed(1)} mmol/L</b></div>`+
+      `<div style="color:#555;">Her 100 mg/dL glukoz artışı için Na'ya eklenir.</div>`;
+  }
+  window.calcNaCorr=calcNaCorr;
+
+  /* ===== Anyon Açığı ===== */
+  function calcAnionGap(){
+    const na=parseFloat(document.getElementById('ag_na')?.value);
+    const cl=parseFloat(document.getElementById('ag_cl')?.value);
+    const hco3=parseFloat(document.getElementById('ag_hco3')?.value);
+    const alb=parseFloat(document.getElementById('ag_alb')?.value);
+    const r=document.getElementById('anionGapResult');
+    if(!r)return;
+    if(isNaN(na)||isNaN(cl)||isNaN(hco3)){
+      r.innerHTML='<div>Anyon açığı: <b>—</b></div>';
+      return;
+    }
+    const ag=na-(cl+hco3);
+    let html=`<div>Anyon açığı: <b>${ag.toFixed(1)} mmol/L</b> <span style="color:#555;">(normal ~8-12)</span></div>`;
+    if(!isNaN(alb)){
+      const agc=ag+2.5*(4-alb);
+      html+=`<div>Albümin düzeltilmiş: <b>${agc.toFixed(1)} mmol/L</b></div>`;
+    }
+    r.innerHTML=html;
+  }
+  window.calcAnionGap=calcAnionGap;
 
   buildScorePanel();
 
