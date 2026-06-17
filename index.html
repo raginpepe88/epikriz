@@ -86,6 +86,19 @@
   .login-actions button{flex:1;border:2px solid;border-color:var(--light) var(--dark) var(--dark) var(--light);background:#c0c0c0;font:700 13px Arial;padding:6px;cursor:pointer;}
   .login-actions button:active{border-color:var(--dark) var(--light) var(--light) var(--dark);}
   .login-err{color:#b00020;font-size:12px;margin-top:8px;min-height:15px;}
+  .morse-panel{width:440px;max-width:92vw;background:#c0c0c0;border:2px solid;border-color:var(--light) var(--dark) var(--dark) var(--light);box-shadow:inset 1px 1px 0 var(--hl);padding:16px 20px;text-align:left;max-height:86vh;overflow:auto;}
+  .morse-panel h2{font-size:16px;margin:0 0 12px;text-align:center;}
+  .morse-item{margin-bottom:12px;}
+  .morse-q{font-size:13px;font-weight:700;margin-bottom:4px;}
+  .morse-opt{display:flex;align-items:center;gap:6px;font-size:13px;padding:2px 0;cursor:pointer;}
+  .morse-opt input{margin:0;}
+  .morse-result{margin-top:6px;border-top:1px solid #808080;padding-top:10px;text-align:center;}
+  .morse-total{font-size:14px;}
+  .morse-risk{font-size:16px;font-weight:700;margin:4px 0;}
+  .morse-risk.ok{color:#1a7a1a;} .morse-risk.warn{color:#b8860b;} .morse-risk.high{color:#b00020;}
+  .morse-rec{font-size:12px;color:#333;}
+  .morse-kabul{width:100%;box-sizing:border-box;border:2px solid;border-color:var(--shadow) var(--light) var(--light) var(--shadow);padding:5px 7px;font-size:13px;}
+  .morse-export-status{font-size:12px;color:#1a7a1a;margin-top:8px;min-height:14px;text-align:center;}
 
   .mode-switch-row{display:flex;align-items:center;gap:8px;margin-bottom:12px;text-transform:none;}
   .mode-switch-row .mode-label{font-size:11px;font-weight:700;background:#c0c0c0;padding:3px 8px;
@@ -507,7 +520,30 @@
 </div>
 
 <div class="landing" id="testLanding" style="display:none;">
-  <button type="button" class="test-login-btn" onclick="testLogout()">← Çıkış</button>
+  <h1>Araçlar</h1>
+  <button type="button" class="test-login-btn" onclick="showMorseForm()">Falls Score</button>
+  <button type="button" class="test-login-btn" style="margin-top:18px;" onclick="testLogout()">← Çıkış</button>
+</div>
+
+<div class="landing" id="morseForm" style="display:none;">
+  <div class="morse-panel">
+    <h2>Morse Düşme Skalası</h2>
+    <div class="morse-item">
+      <div class="morse-q">Kabul No</div>
+      <input type="text" id="morseKabulNo" class="morse-kabul" placeholder="Hasta kabul numarası">
+    </div>
+    <div id="morseItems"></div>
+    <div class="morse-result" id="morseResult"></div>
+    <div class="login-actions">
+      <button type="button" onclick="hideMorseForm()">← Geri</button>
+      <button type="button" onclick="resetMorse()">Temizle</button>
+      <button type="button" onclick="morseExport()">Gönder</button>
+    </div>
+    <div class="login-actions" style="margin-top:8px;">
+      <button type="button" onclick="morseExcel()">📥 Excel indir (tüm kayıtlar)</button>
+    </div>
+    <div class="morse-export-status" id="morseExportStatus"></div>
+  </div>
 </div>
 
 <div class="app-body" id="appBody" style="display:none;">
@@ -12549,7 +12585,88 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
     localStorage.removeItem('epikriz_session');
     document.getElementById('testLanding').style.display='none';
     document.getElementById('testLogin').style.display='none';
+    document.getElementById('morseForm').style.display='none';
     landing.style.display='flex';
+  };
+
+  // ---- Morse Düşme Skalası (Falls Score) ----
+  const MORSE_ITEMS=[
+    {key:'history', label:'1. Düşme öyküsü (hemen veya son 3 ay)', opts:[['Hayır',0],['Evet',25]]},
+    {key:'secondary', label:'2. İkincil tanı (birden fazla tıbbi tanı)', opts:[['Hayır',0],['Evet',15]]},
+    {key:'aid', label:'3. Yürüme yardımcısı', opts:[['Yok / yatak istirahati / hemşire yardımı',0],['Koltuk değneği / baston / walker',15],['Mobilyaya tutunarak',30]]},
+    {key:'iv', label:'4. IV / Heparin kilidi', opts:[['Hayır',0],['Evet',20]]},
+    {key:'gait', label:'5. Yürüyüş / transfer', opts:[['Normal / yatak istirahati / immobil',0],['Zayıf',10],['Bozuk',20]]},
+    {key:'mental', label:'6. Mental durum', opts:[['Kendi yeteneğinin farkında',0],['Kısıtlılıklarını unutuyor',15]]},
+  ];
+  function buildMorse(){
+    const c=document.getElementById('morseItems');
+    if(!c||c.dataset.built)return;
+    c.innerHTML=MORSE_ITEMS.map(it=>`<div class="morse-item"><div class="morse-q">${it.label}</div>`+
+      it.opts.map((o,i)=>`<label class="morse-opt"><input type="radio" name="morse_${it.key}" value="${o[1]}"${i===0?' checked':''}> ${o[0]} <b>(${o[1]})</b></label>`).join('')+`</div>`).join('');
+    c.dataset.built='1';
+    c.addEventListener('change',computeMorse);
+  }
+  function computeMorse(){
+    let total=0;
+    MORSE_ITEMS.forEach(it=>{const sel=document.querySelector(`input[name="morse_${it.key}"]:checked`); if(sel)total+=+sel.value;});
+    let risk,cls,rec;
+    if(total<=24){risk='Risk yok';cls='ok';rec='Temel hemşirelik bakımı.';}
+    else if(total<=50){risk='Düşük risk';cls='warn';rec='Standart düşme önleme girişimleri.';}
+    else{risk='Yüksek risk';cls='high';rec='Yüksek riskli düşme önleme girişimleri.';}
+    document.getElementById('morseResult').innerHTML=`<div class="morse-total">Toplam: <b>${total}</b> / 125</div><div class="morse-risk ${cls}">${risk}</div><div class="morse-rec">${rec}</div>`;
+  }
+  window.showMorseForm=function(){
+    buildMorse(); computeMorse();
+    document.getElementById('testLanding').style.display='none';
+    document.getElementById('morseForm').style.display='flex';
+  };
+  window.hideMorseForm=function(){
+    document.getElementById('morseForm').style.display='none';
+    document.getElementById('testLanding').style.display='flex';
+  };
+  window.resetMorse=function(){
+    MORSE_ITEMS.forEach(it=>{const first=document.querySelector(`input[name="morse_${it.key}"]`); if(first)first.checked=true;});
+    document.getElementById('morseKabulNo').value='';
+    document.getElementById('morseExportStatus').textContent='';
+    computeMorse();
+  };
+  // Falls kayıtları Supabase'de: Gönder=POST, Excel indir=Supabase'den çekip CSV. Giriş JWT'siyle kimlikli.
+  function fallsAuthHeaders(){
+    let token=SUPABASE_KEY;
+    try{const s=JSON.parse(localStorage.getItem('epikriz_session')); if(s&&s.access_token)token=s.access_token;}catch(e){}
+    return {'apikey':SUPABASE_KEY,'Authorization':`Bearer ${token}`,'Content-Type':'application/json'};
+  }
+  window.morseExport=async function(){
+    const status=document.getElementById('morseExportStatus');
+    const kabul=(document.getElementById('morseKabulNo').value||'').trim();
+    if(!kabul){status.style.color='#b00020';status.textContent='Önce Kabul No girin.';return;}
+    let total=0; const sc={};
+    MORSE_ITEMS.forEach(it=>{const s=document.querySelector(`input[name="morse_${it.key}"]:checked`);sc[it.key]=+s.value;total+=+s.value;});
+    const risk=total<=24?'Risk yok':total<=50?'Düşük risk':'Yüksek risk';
+    const rec={kabul_no:kabul,dusme_oykusu:sc.history,ikincil_tani:sc.secondary,yurume_yardimcisi:sc.aid,iv_heparin:sc.iv,yuruyus:sc.gait,mental:sc.mental,total,risk};
+    status.style.color='#333';status.textContent='Gönderiliyor…';
+    try{
+      const res=await fetch(`${SUPABASE_URL}/rest/v1/falls_records`,{method:'POST',headers:{...fallsAuthHeaders(),'Prefer':'return=minimal'},body:JSON.stringify(rec)});
+      if(res.ok){status.style.color='#1a7a1a';status.textContent="Supabase'e kaydedildi.";}
+      else{const d=await res.json().catch(()=>({}));status.style.color='#b00020';status.textContent='Kaydedilemedi: '+(d.message||d.hint||('HTTP '+res.status));}
+    }catch(e){status.style.color='#b00020';status.textContent='Bağlantı hatası.';}
+  };
+  window.morseExcel=async function(){
+    const status=document.getElementById('morseExportStatus');
+    status.style.color='#333';status.textContent='Kayıtlar alınıyor…';
+    try{
+      const res=await fetch(`${SUPABASE_URL}/rest/v1/falls_records?select=*&order=created_at.asc`,{headers:fallsAuthHeaders()});
+      if(!res.ok){const d=await res.json().catch(()=>({}));status.style.color='#b00020';status.textContent='Alınamadı: '+(d.message||('HTTP '+res.status));return;}
+      const recs=await res.json();
+      if(!recs.length){status.style.color='#333';status.textContent='Henüz kayıt yok.';return;}
+      const cols=[['created_at','Tarih'],['kabul_no','Kabul No'],['dusme_oykusu','Düşme öyküsü'],['ikincil_tani','İkincil tanı'],['yurume_yardimcisi','Yürüme yardımcısı'],['iv_heparin','IV/Heparin'],['yuruyus','Yürüyüş'],['mental','Mental'],['total','Toplam'],['risk','Risk']];
+      const esc=v=>`"${String(v==null?'':v).replace(/"/g,'""')}"`;
+      const lines=[cols.map(c=>esc(c[1])).join(';')];
+      recs.forEach(r=>lines.push(cols.map(c=>esc(r[c[0]])).join(';')));
+      const blob=new Blob(['﻿'+lines.join('\r\n')],{type:'text/csv;charset=utf-8;'});
+      const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='falls_records.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);
+      status.style.color='#1a7a1a';status.textContent=`${recs.length} kayıt Excel olarak indirildi.`;
+    }catch(e){status.style.color='#b00020';status.textContent='Bağlantı hatası.';}
   };
 
   const followups={
