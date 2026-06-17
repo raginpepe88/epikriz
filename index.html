@@ -458,7 +458,7 @@
     <button class="mode-btn" onclick="selectMode('travma')">
       <span class="icon">🚑</span>
       Travma
-      <span class="desc">Tüm form + Adli Rapor</span>
+      <span class="desc">Tüm travma değerlendirme formu</span>
     </button>
   </div>
   <p>Daha sonra formun üstündeki "Mod değiştir" butonu ile seçimi değiştirebilirsiniz.</p>
@@ -2225,10 +2225,16 @@
 
       <div class="subhead">Radyolojik bulgu</div>
       <div class="chips" data-single="true" id="adliRadyo">
-        <button class="chip active">Akut patoloji izlenmedi</button>
+        <button class="chip active" id="chipRadyoAkut">Akut patoloji izlenmedi</button>
         <button class="chip" id="chipRadyoPatoloji">Patolojik bulgu izlendi</button>
       </div>
       <input class="extra" id="f_adli_radyo_detay" style="display:none;" placeholder="örn. sol radius distal kırığı">
+
+      <div class="subhead">Nörovasküler Defisit</div>
+      <div class="chips" data-single="true" id="adliNvd">
+        <button class="chip active" id="chipNvdIzlenmedi">NVD izlenmedi</button>
+        <button class="chip" id="chipNvdIzlendi">NVD izlendi</button>
+      </div>
 
       <div class="subhead">Basit tıbbi müdahale ile</div>
       <div class="chips" data-single="true" id="adliGiderilebilir">
@@ -13464,6 +13470,7 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
   // --- Adli Rapor ---
   const chipRadyoPatoloji=document.getElementById('chipRadyoPatoloji');
   const adliRadyoDetay=document.getElementById('f_adli_radyo_detay');
+  const chipNvdIzlendi=document.getElementById('chipNvdIzlendi');
 
   function updateAdliExtras(){
     adliRadyoDetay.style.display=chipRadyoPatoloji.classList.contains('active')?'block':'none';
@@ -13943,6 +13950,7 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
     const giderChip=adliBox.querySelector('#adliGiderilebilir .chip.active');
     const hayatiChip=adliBox.querySelector('#adliHayatiTehlike .chip.active');
     const radyoActive=chipRadyoPatoloji.classList.contains('active');
+    const akutActive=document.getElementById('chipRadyoAkut').classList.contains('active');
     const lezyonlar=lezyonlarText();
     const patoloji=lezyonlar||val('f_adli_patoloji');
 
@@ -13975,9 +13983,12 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
     if(radyoActive){
       const detay=val('f_adli_radyo_detay');
       sentences.push(detay?`Çekilen radyolojik görüntülemelerde ${detay} izlendi.`:'Çekilen radyolojik görüntülemelerde patolojik bulgu izlendi.');
-    }else{
+    }else if(akutActive){
       sentences.push('Çekilen radyolojik görüntülemelerde akut patoloji izlenmedi.');
     }
+
+    const nvdIzlendi=chipNvdIzlendi.classList.contains('active');
+    sentences.push(nvdIzlendi?'Nörovasküler defisit izlendi.':'Nörovasküler defisit izlenmedi.');
 
     // Müdahale şekli + hayati tehlike tek cümlede birleştirilir
     if(giderChip&&hayatiChip){
@@ -14828,6 +14839,15 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
         el.addEventListener('change',recalc);
       });
       recalc();
+      // CHA2DS2-VASc yaş seçenekleri mutual exclusion (≥75 ve 65-74 aynı anda seçilemez)
+      if(def.id==='chads'){
+        const cb75=body.querySelector('[data-key="age75"]');
+        const cb65=body.querySelector('[data-key="age65"]');
+        if(cb75&&cb65){
+          cb75.addEventListener('change',()=>{if(cb75.checked){cb65.checked=false;}});
+          cb65.addEventListener('change',()=>{if(cb65.checked){cb75.checked=false;}});
+        }
+      }
       card.querySelector('.score-head').addEventListener('click',()=>card.classList.toggle('open'));
       holder.appendChild(card);
     });
