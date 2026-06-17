@@ -12742,6 +12742,41 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
     {sys:'cilt', label:'Döküntü', type:'freetext'},
     {sys:'cilt', label:'Yanık', type:'freetext'},
     {sys:'cilt', label:'Ödem', type:'lokalizasyon3'},
+    {sys:'basboyun', label:'Pupil ışık reaksiyonu azalmış/yok', type:'lokalizasyon3'},
+    {sys:'basboyun', label:'Konjonktival hiperemi / subkonjonktival kanama', type:'lokalizasyon3'},
+    {sys:'basboyun', label:'Periorbital ödem / ekimoz', type:'lokalizasyon3'},
+    {sys:'basboyun', label:'Kulak zarı hiperemik / bombe', type:'lokalizasyon3'},
+    {sys:'basboyun', label:'Dış kulak yolunda akıntı / yabancı cisim', type:'lokalizasyon3'},
+    {sys:'solunum', label:'İnce raller', type:'lokalizasyon3'},
+    {sys:'solunum', label:'Kaba raller', type:'lokalizasyon3'},
+    {sys:'solunum', label:'Ronküs', type:'lokalizasyon3'},
+    {sys:'solunum', label:'Wheezing', type:'lokalizasyon3'},
+    {sys:'solunum', label:'Hiperrezonans', type:'lokalizasyon3'},
+    {sys:'solunum', label:'Matite', type:'lokalizasyon3'},
+    {sys:'solunum', label:'Plevral frotman', type:'lokalizasyon3'},
+    {sys:'solunum', label:'Asimetrik göğüs hareketi / paradoks solunum', type:'lokalizasyon3'},
+    {sys:'batin', label:'Rebound hassasiyet', type:'kadranMulti'},
+    {sys:'batin', label:'Palpabl kitle', type:'kadranMulti'},
+    {sys:'noro', label:'Fasiyal asimetri / paralizi', type:'lokalizasyon3'},
+    {sys:'noro', label:'Hemiparezi / hemipleji', type:'lokalizasyon3'},
+    {sys:'msk', label:'Eklem şişliği / efüzyon', type:'bolge'},
+    {sys:'msk', label:'Eklem hassasiyeti / hareketle ağrı', type:'bolge'},
+    {sys:'msk', label:'Eritem ve sıcaklık artışı', type:'bolge'},
+    {sys:'msk', label:'Deformite / anormal pozisyon', type:'bolge'},
+    {sys:'msk', label:'Krepitasyon', type:'bolge'},
+    {sys:'msk', label:'Lokalize kemik hassasiyeti', type:'bolge'},
+    {sys:'msk', label:'Açık yara / kemikte açıklık', type:'bolge'},
+    {sys:'msk', label:'Distalde nörovasküler defisit', type:'lokalizasyon3'},
+    {sys:'msk', label:'Vertebra üzerinde hassasiyet', type:'vertebralSeviye'},
+    {sys:'msk', label:'Paravertebral kas spazmı', type:'vertebralSeviye'},
+    {sys:'cilt', label:'Ekimoz / hematom', type:'bolge'},
+    {sys:'cilt', label:'Laserasyon / abrazyon', type:'bolge'},
+    {sys:'cilt', label:'Basınç ülseri', type:'bolge'},
+    {sys:'sirt', label:'Vertebra hassasiyeti', type:'vertebralSeviye'},
+    {sys:'sirt', label:'Kas spazmı', type:'vertebralSeviye'},
+    {sys:'sirt', label:'Ekimoz', type:'bolge'},
+    {sys:'sirt', label:'Açık yara', type:'bolge'},
+    {sys:'sirt', label:'Deformite', type:'bolge'},
   ];
   examExtraDefs.forEach(def=>{
     const sysEl=examWrap.querySelector(`.exam-sys[data-sys="${def.sys}"]`);
@@ -12766,6 +12801,13 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
       wrap.innerHTML=`<div class="chips" data-exam-extra="kadranmulti">
         <button class="chip">Sağ üst kadran</button><button class="chip">Sol üst kadran</button>
         <button class="chip">Sağ alt kadran</button><button class="chip">Sol alt kadran</button></div>`;
+    }else if(def.type==='vertebralSeviye'){
+      wrap.innerHTML=`<div class="chips" data-exam-extra="vertebralseviye">
+        <button class="chip">Servikal</button><button class="chip">Torakal</button>
+        <button class="chip">Lomber</button><button class="chip">Sakral</button></div>`;
+    }else if(def.type==='bolge'){
+      wrap.innerHTML=`<div class="chips" data-single="true" data-exam-extra="bolgetaraf"><button class="chip">Sağ</button><button class="chip">Sol</button></div>
+        <input type="text" class="extra" data-exam-extra="bolgetext" placeholder="Lokalizasyon" style="margin-top:4px;">`;
     }else if(def.type==='redukte'){
       wrap.innerHTML=`<div class="chips" data-single="true" data-exam-extra="redukte"><button class="chip">Redükte</button><button class="chip">Redükte değil</button></div>`;
     }else if(def.type==='freetext'){
@@ -12809,6 +12851,18 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
       const short={'Sağ üst kadran':'sağ üst','Sol üst kadran':'sol üst','Sağ alt kadran':'sağ alt','Sol alt kadran':'sol alt'};
       const parts=act.map(t=>short[t]||lc(t));
       return parts.join(', ')+(parts.length>1?' kadranlarda':' kadranda');
+    }
+    if(def.type==='vertebralSeviye'){
+      const act=[...wrap.querySelectorAll('[data-exam-extra="vertebralseviye"] .chip.active')].map(c=>lc(c.textContent.trim()));
+      return act.length?act.join(', ')+' seviyede':'';
+    }
+    if(def.type==='bolge'){
+      const t=wrap.querySelector('[data-exam-extra="bolgetaraf"] .chip.active');
+      const inp=wrap.querySelector('[data-exam-extra="bolgetext"]');
+      const parts=[];
+      if(t)parts.push(lc(t.textContent.trim()));
+      if(inp&&inp.value.trim())parts.push(inp.value.trim());
+      return parts.join(' ');
     }
     if(def.type==='redukte'){
       const c=wrap.querySelector('[data-exam-extra="redukte"] .chip.active');
@@ -13888,7 +13942,13 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
       if(s.tagName==='LABEL'||/chip-cat-label|subhead/i.test(c)){lbl=(s.textContent||'').trim();break;}
       s=s.previousElementSibling;
     }
-    const ctx=[secF&&'s:'+secF,ancId&&'a:'+ancId,extra,lbl&&'l:'+lbl].filter(Boolean).join('|');
+    // Fizik muayene alt-seçenek kutucukları (.exam-extra): sahip oldukları bulgu chip'iyle
+    // ayırt et (ör. "İnce raller"in "Sağ"ı ile "Ronküs"ün "Sağ"ı çakışmasın).
+    let eeOwner='',ee=el.closest('.exam-extra');
+    if(ee&&ee.previousElementSibling&&ee.previousElementSibling.classList&&ee.previousElementSibling.classList.contains('chip')){
+      eeOwner='ee:'+((ee.previousElementSibling.dataset.full||ee.previousElementSibling.textContent)||'').trim();
+    }
+    const ctx=[secF&&'s:'+secF,ancId&&'a:'+ancId,extra,eeOwner,lbl&&'l:'+lbl].filter(Boolean).join('|');
     const self=(el.classList&&el.classList.contains('chip'))
       ? 'c:'+((el.dataset.full||el.textContent)||'').trim()
       : el.tagName+':'+(el.placeholder||el.name||'');
