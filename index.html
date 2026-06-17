@@ -99,6 +99,7 @@
   .morse-rec{font-size:12px;color:#333;}
   .morse-kabul{width:100%;box-sizing:border-box;border:2px solid;border-color:var(--shadow) var(--light) var(--light) var(--shadow);padding:5px 7px;font-size:13px;}
   .morse-export-status{font-size:12px;color:#1a7a1a;margin-top:8px;min-height:14px;text-align:center;}
+  .morse-undo-btn{color:#b00020;font-weight:700;}
 
   .mode-switch-row{display:flex;align-items:center;gap:8px;margin-bottom:12px;text-transform:none;}
   .mode-switch-row .mode-label{font-size:11px;font-weight:700;background:#c0c0c0;padding:3px 8px;
@@ -543,6 +544,9 @@
       <button type="button" onclick="morseExcel()">📥 Excel indir (tüm kayıtlar)</button>
     </div>
     <div class="morse-export-status" id="morseExportStatus"></div>
+    <div class="login-actions" id="morseUndoRow" style="display:none;margin-top:6px;">
+      <button type="button" class="morse-undo-btn" onclick="morseDeleteLast()">🗑 Son gönderiyi sil</button>
+    </div>
   </div>
 </div>
 
@@ -12616,7 +12620,8 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
     document.getElementById('morseResult').innerHTML=`<div class="morse-total">Toplam: <b>${total}</b> / 125</div><div class="morse-risk ${cls}">${risk}</div><div class="morse-rec">${rec}</div>`;
   }
   window.showMorseForm=function(){
-    buildMorse(); computeMorse();
+    buildMorse(); computeMorse(); morseUndoHide();
+    document.getElementById('morseExportStatus').textContent='';
     document.getElementById('testLanding').style.display='none';
     document.getElementById('morseForm').style.display='flex';
   };
@@ -12628,9 +12633,12 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
     MORSE_ITEMS.forEach(it=>{const first=document.querySelector(`input[name="morse_${it.key}"]`); if(first)first.checked=true;});
     document.getElementById('morseKabulNo').value='';
     document.getElementById('morseExportStatus').textContent='';
+    morseUndoHide();
     computeMorse();
   };
   // Falls kayıtları Supabase'de: Gönder=POST, Excel indir=Supabase'den çekip CSV. Giriş JWT'siyle kimlikli.
+  let lastFallsId=null;
+  function morseUndoHide(){ const r=document.getElementById('morseUndoRow'); if(r)r.style.display='none'; lastFallsId=null; }
   function fallsAuthHeaders(){
     let token=SUPABASE_KEY;
     try{const s=JSON.parse(localStorage.getItem('epikriz_session')); if(s&&s.access_token)token=s.access_token;}catch(e){}
@@ -12647,10 +12655,29 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
     try{const s=JSON.parse(localStorage.getItem('epikriz_session')); if(s&&s.user&&s.user.email){const e=s.user.email; ekleyen=e.endsWith(AUTH_DOMAIN)?e.slice(0,-AUTH_DOMAIN.length):e;}}catch(e){}
     const rec={kabul_no:kabul,dusme_oykusu:sc.history,ikincil_tani:sc.secondary,yurume_yardimcisi:sc.aid,iv_heparin:sc.iv,yuruyus:sc.gait,mental:sc.mental,total,risk,ekleyen};
     status.style.color='#333';status.textContent='Gönderiliyor…';
+    morseUndoHide();
     try{
-      const res=await fetch(`${SUPABASE_URL}/rest/v1/falls_records`,{method:'POST',headers:{...fallsAuthHeaders(),'Prefer':'return=minimal'},body:JSON.stringify(rec)});
-      if(res.ok){status.style.color='#1a7a1a';status.textContent="Kaydedildi.";}
+      const res=await fetch(`${SUPABASE_URL}/rest/v1/falls_records`,{method:'POST',headers:{...fallsAuthHeaders(),'Prefer':'return=representation'},body:JSON.stringify(rec)});
+      if(res.ok){
+        const arr=await res.json().catch(()=>[]); lastFallsId=(arr&&arr[0]&&arr[0].id!=null)?arr[0].id:null;
+        status.style.color='#1a7a1a';status.textContent="Kaydedildi.";
+        if(lastFallsId!=null){const r=document.getElementById('morseUndoRow'); if(r)r.style.display='flex';}
+      }
       else{const d=await res.json().catch(()=>({}));status.style.color='#b00020';status.textContent='Kaydedilemedi: '+(d.message||d.hint||('HTTP '+res.status));}
+    }catch(e){status.style.color='#b00020';status.textContent='Bağlantı hatası.';}
+  };
+  window.morseDeleteLast=async function(){
+    const status=document.getElementById('morseExportStatus');
+    if(lastFallsId==null){status.style.color='#b00020';status.textContent='Silinecek son gönderi yok.';return;}
+    status.style.color='#333';status.textContent='Siliniyor…';
+    try{
+      const res=await fetch(`${SUPABASE_URL}/rest/v1/falls_records?id=eq.${lastFallsId}`,{method:'DELETE',headers:{...fallsAuthHeaders(),'Prefer':'return=representation'}});
+      if(res.ok){
+        const arr=await res.json().catch(()=>[]);
+        if(arr&&arr.length){status.style.color='#1a7a1a';status.textContent='Silindi.';morseUndoHide();}
+        else{status.style.color='#b00020';status.textContent='Silinemedi: bu kaydı silme yetkiniz yok.';}
+      }
+      else{const d=await res.json().catch(()=>({}));status.style.color='#b00020';status.textContent='Silinemedi: '+(d.message||d.hint||('HTTP '+res.status));}
     }catch(e){status.style.color='#b00020';status.textContent='Bağlantı hatası.';}
   };
   window.morseExcel=async function(){
