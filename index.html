@@ -12595,16 +12595,16 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
         'Lokalize hassasiyet',
         'Defans',
         'Rebound hassasiyet',
-        'Rijit / tahta gibi batın',
+        'Tahta karın',
         'Bağırsak sesleri azalmış / yok',
         'Bağırsak sesleri artmış',
         'Hepatomegali',
         'Splenomegali',
         'Palpabl kitle',
-        'Murphy belirtisi (+)',
+        'Murphy sign (+)',
         'McBurney noktası hassasiyeti (+)',
-        'Rovsing belirtisi (+)',
-        'Psoas / obturator belirtisi (+)',
+        'Rovsing sign (+)',
+        'Psoas / obturator sign (+)',
         'Pulsatil kitle',
         'KVA hassasiyeti (+)',
         'Herni',
@@ -12722,9 +12722,9 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
   solunumAzalmisSub.id='solunumAzalmisSub';
   solunumAzalmisSub.setAttribute('data-single','true');
   solunumAzalmisSub.style.display='none';
-  solunumAzalmisSub.style.marginTop='7px';
+  solunumAzalmisSub.style.marginTop='7px';solunumAzalmisSub.style.flexBasis='100%';
   solunumAzalmisSub.innerHTML=`<button class="chip">Sağ</button><button class="chip">Sol</button><button class="chip">Bilateral</button>`;
-  chipSolunumAzalmis.closest('.chips').insertAdjacentElement('afterend', solunumAzalmisSub);
+  chipSolunumAzalmis.insertAdjacentElement('afterend', solunumAzalmisSub);
 
   // --- Fizik Muayene: parantezli placeholder içeren bulgular için alt-chip / detay alanları ---
   const examExtraMap=new Map();
@@ -12751,7 +12751,7 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
     const wrap=document.createElement('div');
     wrap.className='exam-extra';
     wrap.style.display='none';
-    wrap.style.margin='4px 0 7px 0';
+    wrap.style.margin='4px 0 7px 0';wrap.style.flexBasis='100%';
     if(def.type==='lokalizasyon3'){
       wrap.innerHTML=`<div class="chips" data-single="true" data-exam-extra="loc"><button class="chip">Sağ</button><button class="chip">Sol</button><button class="chip">Bilateral</button></div>`;
     }else if(def.type==='lokalizasyonDerece'){
@@ -12773,7 +12773,7 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
     }else if(def.type==='santralPeriferik'){
       wrap.innerHTML=`<div class="chips" data-single="true" data-exam-extra="santralperiferik"><button class="chip">Santral</button><button class="chip">Periferik</button></div>`;
     }
-    chip.closest('.chips').insertAdjacentElement('afterend', wrap);
+    chip.insertAdjacentElement('afterend', wrap);
     examExtraMap.set(chip, {wrap, def});
   });
 
