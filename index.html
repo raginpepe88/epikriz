@@ -154,6 +154,7 @@
 
   .mini-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:7px;font-size:11px;font-weight:700;color:#000;}
   .mini-row .txt{width:48px;flex:none;font-weight:400;}
+  .mini-row .bm-size{width:auto;min-width:62px;}
 
   /* Adli Rapor: lezyon kartlari */
   .lezyon-card{background:#c0c0c0;border:2px solid;
@@ -13612,6 +13613,18 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
     </svg>`;
   }
 
+  // Boyut dropdown'ı: 0,1–0,9 (0,1 aralık) · 1–9,5 (0,5 aralık) · 10–20 (1 cm aralık)
+  const LEZYON_BOYUT_OPTS=(function(){
+    const vals=[];
+    for(let i=1;i<=9;i++)vals.push(i/10);
+    for(let i=2;i<=19;i++)vals.push(i/2);
+    for(let i=10;i<=20;i++)vals.push(i);
+    return '<option value="">—</option>'+vals.map(v=>{
+      const s=Number.isInteger(v)?String(v):String(v).replace('.',',');
+      return `<option value="${s}">${s}</option>`;
+    }).join('');
+  })();
+
   function createLezyonCard(){
     const card=document.createElement('div');
     card.className='lezyon-card';
@@ -13645,8 +13658,8 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
       </div>
       <div class="sub">Boyut (cm)</div>
       <div class="mini-row">
-        <input class="txt" type="number" min="0" step="0.1" data-role="x" placeholder="3"><span>x</span>
-        <input class="txt" type="number" min="0" step="0.1" data-role="y" placeholder="2"><span>cm</span>
+        <select class="txt bm-size" data-role="x">${LEZYON_BOYUT_OPTS}</select><span>x</span>
+        <select class="txt bm-size" data-role="y">${LEZYON_BOYUT_OPTS}</select><span>cm</span>
       </div>`;
     lezyonList.appendChild(card);
     renumberLezyonCards();
@@ -13723,7 +13736,7 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
       parts.push(lokatif(lc(BM_DATA[sel[0]].rap)));
     }
     if(x&&y)parts.push(`${x}x${y} cm boyutunda`);
-    else if(x)parts.push(`${x} cm boyutunda`);
+    else if(x||y)parts.push(`${x||y} cm uzunluğunda`);
 
     let tipText=tip?lc(tip.textContent.trim()):'lezyon';
     if(tip&&tip.textContent.trim()==='Yanık'){
