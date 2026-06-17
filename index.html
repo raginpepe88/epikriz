@@ -2025,7 +2025,7 @@
 
     <!-- 08 Tedavi -->
     <div class="section" data-field="tedavi">
-      <div class="sec-label"><span class="num">09</span> Acilde Uygulanan Tedavi</div>
+      <div class="sec-label"><span class="num">10</span> Acilde Uygulanan Tedavi</div>
       <div class="chips">
         <button class="chip">İV sıvı</button>
         <button class="chip">Analjezik</button>
@@ -2033,14 +2033,21 @@
         <button class="chip">Antibiyotik</button>
         <button class="chip">Nebülizatör</button>
         <button class="chip">O₂ desteği</button>
+        <button class="chip">NİMV</button>
         <button class="chip">Antiagregan/antikoagülan</button>
         <button class="chip">Antihipertansif</button>
+        <button class="chip">Diüretik</button>
         <button class="chip">Yara bakımı</button>
         <button class="chip">Sütür</button>
         <button class="chip">Tetanos aşısı</button>
         <button class="chip">Pansuman</button>
       </div>
-      <div class="sub">Prosedürler / Ek Girişimler</div>
+      <input class="extra" data-extra placeholder="İlaç adı-doz">
+    </div>
+
+    <!-- 11 Prosedürler / Ek Girişimler -->
+    <div class="section" data-field="prosedur">
+      <div class="sec-label"><span class="num">11</span> Prosedürler / Ek Girişimler</div>
       <div class="chips">
         <button class="chip">Entübasyon</button>
         <button class="chip">Göğüs tüpü takıldı</button>
@@ -2048,7 +2055,7 @@
         <button class="chip">Pelvik stabilizasyon</button>
         <button class="chip">Laserasyon onarımı/sütür</button>
       </div>
-      <input class="extra" data-extra placeholder="İlaç adı-doz / diğer işlemler">
+      <input class="extra" data-extra placeholder="Diğer girişim / detay">
     </div>
 
     <!-- 09 Karar -->
@@ -12359,9 +12366,9 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
   let currentMode=null;
 
   const sectionFieldsByMode={
-    dahili:['hasta','gks','sikayet','vital','hikaye','ozgecmis','alerji','ilaclar','muayene','tedavi','karar','oneri'],
+    dahili:['hasta','gks','sikayet','vital','hikaye','ozgecmis','alerji','ilaclar','muayene','tedavi','prosedur','karar','oneri'],
     adli:['adli'],
-    travma:['hasta','gks','primary','sikayet','vital','hikaye','fast','muayene','degerlendirme','tedavi','karar','oneri'],
+    travma:['hasta','gks','primary','sikayet','vital','hikaye','fast','muayene','degerlendirme','tedavi','prosedur','karar','oneri'],
   };
   const modeLabels={dahili:'Acil Dahili Hasta',adli:'Adli Muayene',travma:'Travma'};
 
@@ -14200,6 +14207,7 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
       ['Fizik Muayene', examText()],
       ['Değerlendirme Bulguları', degerlendirmeText()],
       ['Uygulanan Tedavi', sec('tedavi')],
+      ['Prosedürler', sec('prosedur')],
       ['Sonuç / Karar', dispoSentence()],
       ['Öneriler', sec('oneri')],
       ['Adli Rapor', adliRaporText()],
