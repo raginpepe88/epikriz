@@ -293,6 +293,9 @@
     padding:3px 9px;cursor:pointer;border-radius:0;}
   .allnorm-btn:active{border-color:var(--dark) var(--light) var(--light) var(--dark);
     box-shadow:inset 1px 1px 0 var(--shadow),inset -1px -1px 0 var(--hl);}
+  .allnorm-btn.on{background:#d7f0d7;color:#1a5a1a;
+    border-color:var(--dark) var(--light) var(--light) var(--dark);
+    box-shadow:inset 1px 1px 0 var(--shadow),inset -1px -1px 0 var(--hl);}
 
   /* retro scrollbar */
   *::-webkit-scrollbar{width:16px;height:16px;}
@@ -13243,12 +13246,28 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
     head.querySelector('.tog').textContent=sysEl.classList.contains('open')?'−':'+';
   });
 
-  document.getElementById('examAllNormal').addEventListener('click',()=>{
-    examWrap.querySelectorAll('.chip[data-normal="true"]').forEach(c=>c.classList.add('active'));
-    examWrap.querySelectorAll('.exam-sys').forEach(s=>{
-      s.classList.add('open');
-      s.querySelector('.tog').textContent='−';
-    });
+  const examAllNormalBtn=document.getElementById('examAllNormal');
+  // Buton çift yönlü: hepsi doğal işaretliyse temizler, değilse hepsini işaretler.
+  function allNormalActive(){
+    const chips=examWrap.querySelectorAll('.chip[data-normal="true"]');
+    return chips.length>0 && [...chips].every(c=>c.classList.contains('active'));
+  }
+  function syncAllNormalBtn(){
+    const on=allNormalActive();
+    examAllNormalBtn.textContent=on?'✗ Doğal işaretini kaldır':'✓ Tüm sistemler doğal';
+    examAllNormalBtn.classList.toggle('on',on);
+  }
+  examAllNormalBtn.addEventListener('click',()=>{
+    const chips=[...examWrap.querySelectorAll('.chip[data-normal="true"]')];
+    if(allNormalActive()){
+      chips.forEach(c=>c.classList.remove('active'));
+    }else{
+      chips.forEach(c=>c.classList.add('active'));
+      examWrap.querySelectorAll('.exam-sys').forEach(s=>{
+        s.classList.add('open');
+        s.querySelector('.tog').textContent='−';
+      });
+    }
     render();
   });
   document.getElementById('examCollapse').addEventListener('click',()=>{
@@ -13265,6 +13284,7 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
       b.textContent=n;
       b.classList.toggle('zero',n===0);
     });
+    syncAllNormalBtn();
   }
 
   function examText(){
