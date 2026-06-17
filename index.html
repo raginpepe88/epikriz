@@ -127,6 +127,10 @@
   .cat-count:empty{display:none;}
   .cat-group{display:none;flex-basis:100%;flex-wrap:wrap;gap:6px;margin-bottom:2px;}
   .cat-group.open{display:flex;}
+  /* Alt seçenek mini penceresi (popover) */
+  .subpop{position:absolute;z-index:80;background:#c0c0c0;border:2px solid;border-color:#fff #808080 #808080 #fff;box-shadow:2px 3px 9px rgba(0,0,0,.4);padding:7px 9px 8px;max-width:min(330px,86vw);min-width:140px;}
+  .subpop::before{content:'';position:absolute;top:-9px;left:13px;border:7px solid transparent;border-bottom-color:#808080;}
+  .subpop::after{content:'';position:absolute;top:-6px;left:14px;border:6px solid transparent;border-bottom-color:#c0c0c0;}
   .chip{border:2px solid;border-color:var(--light) var(--dark) var(--dark) var(--light);
     box-shadow:inset 1px 1px 0 var(--hl),inset -1px -1px 0 var(--shadow);
     background:#c0c0c0;color:#000;font:inherit;font-size:12px;font-weight:400;
@@ -954,7 +958,7 @@
         <button class="chip">görme kaybı</button>
         <button class="chip">konuşma bozukluğu</button>
         <button class="chip" id="chipNobet">Nöbet</button>
-      <div class="chips" id="nobetSub" style="display:none;flex-basis:100%;margin-top:7px;">
+      <div class="chips subpop" id="nobetSub" style="display:none;">
         <button class="chip">Tonik-klonik</button>
         <button class="chip">Tonik</button>
         <button class="chip">Klonik</button>
@@ -1022,7 +1026,7 @@
         <button class="chip">panik atak</button>
         <span class="chip-cat-label">Toksikoloji</span>
         <button class="chip" id="chipAlkol">Alkol kullanımı</button>
-      <div id="alkolSub" style="display:none;flex-basis:100%;margin-top:7px;flex-direction:column;gap:6px;">
+      <div id="alkolSub" class="subpop" style="display:none;flex-direction:column;gap:6px;">
         <div class="chips" data-single="true" id="alkolTur">
           <button class="chip">bira</button>
           <button class="chip">rakı</button>
@@ -1046,7 +1050,7 @@
         </div>
       </div>
         <button class="chip" id="chipMadde">Madde kullanımı</button>
-      <div class="chips" id="maddeSub" style="display:none;flex-basis:100%;margin-top:7px;">
+      <div class="chips subpop" id="maddeSub" style="display:none;">
         <button class="chip">bonzai</button>
         <button class="chip">esrar</button>
         <button class="chip">kokain</button>
@@ -12725,16 +12729,45 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
   const chipSolunumAzalmis=[...solunumSys.querySelectorAll('.chip')].find(c=>c.textContent.trim()==='Solunum sesleri azalmış / yok');
   chipSolunumAzalmis.id='chipSolunumAzalmis';
   const solunumAzalmisSub=document.createElement('div');
-  solunumAzalmisSub.className='chips';
+  solunumAzalmisSub.className='chips subpop';
   solunumAzalmisSub.id='solunumAzalmisSub';
   solunumAzalmisSub.setAttribute('data-single','true');
   solunumAzalmisSub.style.display='none';
-  solunumAzalmisSub.style.marginTop='7px';solunumAzalmisSub.style.flexBasis='100%';
   solunumAzalmisSub.innerHTML=`<button class="chip">Sağ</button><button class="chip">Sol</button><button class="chip">Bilateral</button>`;
   chipSolunumAzalmis.insertAdjacentElement('afterend', solunumAzalmisSub);
 
   // --- Fizik Muayene: parantezli placeholder içeren bulgular için alt-chip / detay alanları ---
   const examExtraMap=new Map();
+  // --- Alt seçenek "mini pencere" (popover) sistemi: tek pencere açık, dışarı tıkla-kapat ---
+  const chipToPanel=new Map();
+  let currentPop=null,currentPopAnchor=null;
+  function positionPop(panel,anchor){
+    let host=panel.closest('.exam-sys')||panel.closest('.section');
+    if(host&&getComputedStyle(host).position==='static')host.style.position='relative';
+    const op=panel.offsetParent||host;if(!op)return;
+    const ar=anchor.getBoundingClientRect(),pr=op.getBoundingClientRect();
+    panel.style.top=(ar.bottom-pr.top+5)+'px';
+    let left=ar.left-pr.left;
+    const pw=panel.offsetWidth||260;
+    if(left+pw>op.clientWidth-4)left=Math.max(2,op.clientWidth-pw-4);
+    panel.style.left=Math.max(2,left)+'px';
+  }
+  function openSubPop(chip){
+    const panel=chipToPanel.get(chip);if(!panel)return;
+    if(currentPop&&currentPop!==panel)currentPop.style.display='none';
+    panel.style.display=panel.dataset.popDisplay||(panel.classList.contains('chips')?'flex':'block');
+    currentPop=panel;currentPopAnchor=chip;
+    positionPop(panel,chip);
+  }
+  function closeSubPop(){
+    if(currentPop)currentPop.style.display='none';
+    currentPop=null;currentPopAnchor=null;
+  }
+  function repositionPop(){
+    if(!currentPop)return;
+    if(!currentPopAnchor||!currentPopAnchor.classList.contains('active')||currentPopAnchor.offsetParent===null){closeSubPop();return;}
+    positionPop(currentPop,currentPopAnchor);
+  }
   const examExtraDefs=[
     {sys:'genel', label:'Siyanoz', type:'santralPeriferik'},
     {sys:'basboyun', label:'Boyunda LAP', type:'lokalizasyon3'},
@@ -12793,7 +12826,7 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
     const wrap=document.createElement('div');
     wrap.className='exam-extra';
     wrap.style.display='none';
-    wrap.style.margin='4px 0 7px 0';wrap.style.flexBasis='100%';
+    wrap.classList.add('subpop');
     if(def.type==='lokalizasyon3'){
       wrap.innerHTML=`<div class="chips" data-single="true" data-exam-extra="loc"><button class="chip">Sağ</button><button class="chip">Sol</button><button class="chip">Bilateral</button></div>`;
     }else if(def.type==='lokalizasyonDerece'){
@@ -12824,7 +12857,9 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
     }
     chip.insertAdjacentElement('afterend', wrap);
     examExtraMap.set(chip, {wrap, def});
+    chipToPanel.set(chip, wrap);
   });
+  chipToPanel.set(chipSolunumAzalmis, solunumAzalmisSub);
 
   function examExtraSuffix(def, wrap){
     if(def.type==='lokalizasyon3'){
@@ -12893,10 +12928,8 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
   }
 
   function updateExamExtras(){
-    solunumAzalmisSub.style.display=chipSolunumAzalmis.classList.contains('active')?'flex':'none';
-    examExtraMap.forEach(({wrap},chip)=>{
-      wrap.style.display=chip.classList.contains('active')?'':'none';
-    });
+    // Alt paneller artık popover olarak yönetiliyor; burada yalnızca açık pencereyi yeniden konumla / kapat.
+    repositionPop();
   }
 
   // --- GKS bölümü ---
@@ -13192,9 +13225,21 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
         }
       }
     }
+    if(chipToPanel.has(chip)){
+      if(chip.classList.contains('active'))openSubPop(chip);
+      else if(currentPop===chipToPanel.get(chip))closeSubPop();
+    }
     refreshDetail();updateSymptomSureBoxes();render();
   });
   form.addEventListener('input',render);
+  // Mini pencere: dışarı tıklayınca kapat (tetikleyici chip'i form handler yönetir, seçim korunur)
+  document.addEventListener('click',e=>{
+    if(!currentPop)return;
+    if(currentPop.contains(e.target))return;
+    const c=e.target.closest&&e.target.closest('.chip');
+    if(c&&chipToPanel.has(c))return;
+    closeSubPop();
+  });
   form.addEventListener('change',render);
 
   function secOf(box){
@@ -13278,11 +13323,15 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
   const alkolSub=document.getElementById('alkolSub');
   const chipMadde=document.getElementById('chipMadde');
   const maddeSub=document.getElementById('maddeSub');
+  // Başvuru şikayeti alt seçenekleri de mini pencere (popover) sistemine kayıtlı
+  chipToPanel.set(chipNobet, nobetSub);
+  chipToPanel.set(chipAlkol, alkolSub);
+  chipToPanel.set(chipMadde, maddeSub);
+  alkolSub.dataset.popDisplay='flex';
 
   function updateSikayetExtras(){
-    nobetSub.style.display=chipNobet.classList.contains('active')?'flex':'none';
-    alkolSub.style.display=chipAlkol.classList.contains('active')?'flex':'none';
-    maddeSub.style.display=chipMadde.classList.contains('active')?'flex':'none';
+    // Alt paneller popover olarak yönetiliyor; açık pencereyi yeniden konumla / kapat.
+    repositionPop();
   }
 
   function sikayetText(){
