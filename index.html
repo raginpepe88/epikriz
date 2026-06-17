@@ -13574,6 +13574,24 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
       out.push({v,rap:'Sağ '+base,ad:'Sağ '+base+h,x:xC(v,'R',dx),y:dy,r:r});
       out.push({v,rap:'Sol '+base,ad:'Sol '+base+h,x:xC(v,'L',dx),y:dy,r:r});};
     const m=(v,rap,dy,r,hint)=>out.push({v,rap,ad:rap+(hint?' ('+hint+')':''),x:100,y:dy,r:r});
+    // Büyütülmüş el (homunculus): falanks + interfalangial eklem düzeyi. wx<100 izleyen-solu, >100 izleyen-sağı.
+    function pushHand(view,side,wx){
+      const mir=wx<100?1:-1, X=dx=>wx+mir*dx, wy=300;
+      const sd=side==='R'?'Sağ':'Sol', yuz=view==='on'?'palmar':'dorsal', yz=view==='on'?'ayası':'sırtı';
+      const z=(rap,x,y,r)=>out.push({v:view,rap,ad:rap,x,y,r});
+      z(`${sd} el bileği ${yuz} yüzü`,X(0),wy-7,4);
+      z(`${sd} el ${yz}`,X(0),wy+9,5);
+      [{n:2,dx:11},{n:3,dx:3.7},{n:4,dx:-3.7},{n:5,dx:-11}].forEach(f=>{const fx=X(f.dx);
+        z(`${sd} el ${f.n}. parmak proksimal falanks ${yuz} yüzü`,fx,wy+30,3);
+        z(`${sd} el ${f.n}. parmak PIP eklemi`,fx,wy+42,2.6);
+        z(`${sd} el ${f.n}. parmak orta falanks ${yuz} yüzü`,fx,wy+52,3);
+        z(`${sd} el ${f.n}. parmak DIP eklemi`,fx,wy+62,2.6);
+        z(`${sd} el ${f.n}. parmak distal falanks ${yuz} yüzü`,fx,wy+72,3);
+      });
+      z(`${sd} el başparmak proksimal falanks ${yuz} yüzü`,X(-18),wy+24,3);
+      z(`${sd} el başparmak IP eklemi`,X(-18),wy+33,2.6);
+      z(`${sd} el başparmak distal falanks ${yuz} yüzü`,X(-18),wy+41,3);
+    }
     // ===== ÖN =====
     p('on','frontal bölge',11,34,4); p('on','temporal bölge',27,43,4); p('on','periorbital bölge',15,48,3.5);
     p('on','zigomatik bölge',22,59,3.5); m('on','Nazal bölge',55,3); p('on','bukkal bölge',20,65,3.5);
@@ -13586,10 +13604,7 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
     p('on','lomber bölge',33,196,5,'flank'); m('on','Hipogastrik bölge',226,6); p('on','iliak bölge',19,221,5);
     m('on','Pubik bölge',255,4); m('on','Genital bölge',263,4); p('on','inguinal bölge',16,249,4,'kasık');
     p('on','kol ön yüzü',50,150,6); p('on','antekubital bölge',51,200,5); p('on','önkol ön yüzü',53,250,6);
-    p('on','el bileği volar yüzü',51,300,4); p('on','el ayası',50,317,4);
-    p('on','el başparmak palmar yüzü',57,323,3); p('on','el 2. parmak palmar yüzü',53,332,3);
-    p('on','el 3. parmak palmar yüzü',50,334,3); p('on','el 4. parmak palmar yüzü',47,332,3);
-    p('on','el 5. parmak palmar yüzü',44,330,3);
+    pushHand('on','R',48); pushHand('on','L',152);
     p('on','uyluk ön yüzü',18,320,7); p('on','patellar bölge',19,388,5); p('on','pretibial bölge',18,450,6);
     p('on','ayak bileği ön yüzü',18,505,4); p('on','ayak sırtı',17,521,4);
     p('on','ayak başparmağı',12,535,2.5); p('on','ayak 2. parmak',16,536,2.5); p('on','ayak 3. parmak',20,536,2.5);
@@ -13603,11 +13618,8 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
     m('arka','Sakral bölge',240,5); m('arka','Koksigeal bölge',258,4); p('arka','gluteal bölge',18,268,7,'kalça');
     m('arka','Perianal bölge',276,3);
     p('arka','omuz arka yüzü',39,104,6); p('arka','posterior aksiller bölge',33,121,4); p('arka','kol arka yüzü',50,150,6);
-    p('arka','olekranon bölgesi',51,200,5); p('arka','önkol arka yüzü',53,250,6); p('arka','el bileği dorsal yüzü',51,300,4);
-    p('arka','el sırtı',50,317,4);
-    p('arka','el başparmak dorsal yüzü',57,323,3); p('arka','el 2. parmak dorsal yüzü',53,332,3);
-    p('arka','el 3. parmak dorsal yüzü',50,334,3); p('arka','el 4. parmak dorsal yüzü',47,332,3);
-    p('arka','el 5. parmak dorsal yüzü',44,330,3);
+    p('arka','olekranon bölgesi',51,200,5); p('arka','önkol arka yüzü',53,250,6);
+    pushHand('arka','R',152); pushHand('arka','L',48);
     p('arka','trokanterik bölge',26,256,5,'kalça yan'); p('arka','uyluk arka yüzü',18,320,7);
     p('arka','popliteal bölge',18,388,5,'diz arkası'); p('arka','baldır (sural bölge)',18,450,6);
     p('arka','Aşil bölgesi',18,495,3.5); p('arka','topuk bölgesi',17,515,4); p('arka','ayak tabanı',17,528,4);
@@ -13627,10 +13639,19 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
     const napeHair='M70,75 Q100,85 130,75';
     const torso='M91,85 C82,86 70,90 60,99 C57,109 58,123 59,141 C60,163 62,186 66,206 C69,221 72,233 76,243 C80,253 84,259 90,263 L100,267 L110,263 C116,259 120,253 124,243 C128,233 131,221 134,206 C138,186 140,163 141,141 C142,123 143,109 140,99 C130,90 118,86 109,85 Z';
     const arm='M61,96 C50,100 45,117 44,141 C43,161 42,181 42,201 C42,226 43,256 46,286 C46,293 47,298 49,301 C53,302 56,302 59,300 C61,286 62,259 63,233 C64,213 64,196 65,179 C66,156 67,131 70,117 C72,108 74,101 77,97 Z';
-    const hand='M49,301 C44,304 42,311 42,319 C42,327 44,333 50,334 C55,334 58,329 58,320 C58,312 56,305 52,301 Z';
+    const handShape=(wx)=>{
+      const hm=wx<100?1:-1, X=dx=>wx+hm*dx, wy=300;
+      const bar=(cx,top,bot,hw)=>`M${cx-hw},${top+hw} Q${cx-hw},${top} ${cx},${top} Q${cx+hw},${top} ${cx+hw},${top+hw} L${cx+hw},${bot-hw} Q${cx+hw},${bot} ${cx},${bot} Q${cx-hw},${bot} ${cx-hw},${bot-hw} Z`;
+      let s=`<path d="${bar(X(0),wy-9,wy+22,11)}"/>`;
+      [11,3.7,-3.7,-11].forEach(dx=>{s+=`<path d="${bar(X(dx),wy+18,wy+76,3.6)}"/>`;});
+      s+=`<path d="${bar(X(-18),wy+12,wy+45,3.6)}"/>`;
+      [11,3.7,-3.7,-11].forEach(dx=>{const fx=X(dx);
+        s+=`<line x1="${fx-3.4}" y1="${wy+42}" x2="${fx+3.4}" y2="${wy+42}" class="bm-line"/><line x1="${fx-3.4}" y1="${wy+62}" x2="${fx+3.4}" y2="${wy+62}" class="bm-line"/>`;});
+      s+=`<line x1="${X(-18)-3.4}" y1="${wy+33}" x2="${X(-18)+3.4}" y2="${wy+33}" class="bm-line"/>`;
+      return s;
+    };
     const leg='M78,251 C70,257 65,273 64,301 C63,331 63,361 65,387 C66,416 66,456 69,491 C70,501 71,509 73,515 C76,517 80,517 83,514 C85,509 86,501 87,491 C89,456 89,419 90,389 C91,361 92,331 92,303 C93,286 94,269 92,255 Z';
     const foot='M74,510 C69,514 67,521 69,529 C71,535 78,538 85,536 C90,534 91,527 90,520 C89,513 84,509 79,509 Z';
-    const fingers='M44,329 L44,334 M47,330 L47,335 M50,330 L50,335 M53,329 L53,334';
     const toes='M73,533 L73,537 M77,534 L77,538 M81,534 L81,538 M85,533 L85,536';
     const clavicle='M99,94 C90,90 78,91 64,98';
     const pectoral='M99,122 C92,137 84,140 74,133';
@@ -13650,13 +13671,13 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
     if(view==='on'){
       inner=dual(clavicle,'bm-line')+dual(pectoral,'bm-line')+dual(costal,'bm-line')+dual(deltoid,'bm-line')+dual(inguinal,'bm-line')+dual(patella,'bm-line')
         +`<line x1="100" y1="100" x2="100" y2="206" class="bm-line"/><circle cx="100" cy="189" r="2.4" class="bm-line"/>`
-        +dual(fingers,'bm-line')+dual(toes,'bm-line')+faceOn;
+        +dual(toes,'bm-line')+faceOn;
     }else{
       inner=dual(scapula,'bm-line')+dual(glutfold,'bm-line')
         +`<line x1="100" y1="95" x2="100" y2="283" class="bm-line"/>`
-        +dual(fingers,'bm-line')+dual(toes,'bm-line')+faceArka;
+        +dual(toes,'bm-line')+faceArka;
     }
-    const body=`<path d="${torso}"/>`+dual(arm,'')+dual(hand,'')+dual(leg,'')+dual(foot,'')+`<path d="${neck}"/><path d="${head}"/>`;
+    const body=`<path d="${torso}"/>`+dual(arm,'')+handShape(48)+handShape(152)+dual(leg,'')+dual(foot,'')+`<path d="${neck}"/><path d="${head}"/>`;
     const zones=BM_DATA.map((z,i)=>z.v===view?`<circle class="bm-zone" data-zi="${i}" cx="${z.x}" cy="${z.y}" r="${z.r}"><title>${z.ad}</title></circle>`:'').join('');
     return `<svg viewBox="0 0 200 560" class="bm-svg" data-view="${view}">
       <g class="bm-body">${body}</g>
