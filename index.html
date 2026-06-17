@@ -349,6 +349,11 @@
   .score-result{margin-top:5px;padding:5px 6px;background:#fff;border:2px solid;
     border-color:var(--shadow) var(--light) var(--light) var(--shadow);
     font-size:10.5px;font-weight:700;color:#000;line-height:1.3;}
+  .score-add{margin-top:5px;width:100%;font-family:inherit;font-size:10.5px;font-weight:700;cursor:pointer;
+    padding:4px 6px;background:var(--face);border:2px solid;
+    border-color:var(--light) var(--dark) var(--dark) var(--light);color:#000;}
+  .score-add:active{border-color:var(--dark) var(--light) var(--light) var(--dark);}
+  .score-add.added{background:#d7f0d7;border-color:#3a7a3a;color:#1a5a1a;}
 
   /* Senkronizasyon modali */
   .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:200;
@@ -13104,8 +13109,7 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
         <button class="chip">Servikal</button><button class="chip">Torakal</button>
         <button class="chip">Lomber</button><button class="chip">Sakral</button></div>`;
     }else if(def.type==='bolge'){
-      wrap.innerHTML=`<div class="chips" data-single="true" data-exam-extra="bolgetaraf"><button class="chip">Sağ</button><button class="chip">Sol</button></div>
-        <input type="text" class="extra" data-exam-extra="bolgetext" placeholder="Lokalizasyon" style="margin-top:4px;">`;
+      wrap.innerHTML=`<input type="text" class="extra" data-exam-extra="bolgetext" placeholder="Lokalizasyon — örn. sağ frontal bölge" style="margin-top:4px;">`;
     }else if(def.type==='redukte'){
       wrap.innerHTML=`<div class="chips" data-single="true" data-exam-extra="redukte"><button class="chip">Redükte</button><button class="chip">Redükte değil</button></div>`;
     }else if(def.type==='freetext'){
@@ -13157,12 +13161,8 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
       return act.length?act.join(', ')+' seviyede':'';
     }
     if(def.type==='bolge'){
-      const t=wrap.querySelector('[data-exam-extra="bolgetaraf"] .chip.active');
       const inp=wrap.querySelector('[data-exam-extra="bolgetext"]');
-      const parts=[];
-      if(t)parts.push(lc(t.textContent.trim()));
-      if(inp&&inp.value.trim())parts.push(inp.value.trim());
-      return parts.join(' ');
+      return inp&&inp.value.trim()?inp.value.trim():'';
     }
     if(def.type==='redukte'){
       const c=wrap.querySelector('[data-exam-extra="redukte"] .chip.active');
@@ -14300,6 +14300,19 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
   }
 
   let lastText='';
+  // Epikrize "✅" ile eklenen klinik skorlar (id -> {name, get:()=>metin}); render() bunları "Klinik Skorlar" satırına basar.
+  const includedScores=new Set();
+  const scoreGetters=new Map();
+  function clinicalScoresText(){
+    const out=[];
+    includedScores.forEach(scoreId=>{
+      const g=scoreGetters.get(scoreId);
+      if(!g)return;
+      const t=(g.get()||'').replace(/^Skor:\s*/,'').trim();
+      if(t)out.push(`${g.name}: ${t}`);
+    });
+    return out.join(' | ');
+  }
 
   // --- Hasta gecmisi / oturum bellegi (sadece JS bellekte, kalici depolama YOK) ---
   let patients=[];
@@ -14620,6 +14633,7 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
       ['FAST', fastText()],
       ['Fizik Muayene', examText()],
       ['Değerlendirme Bulguları', degerlendirmeText()],
+      ['Klinik Skorlar', clinicalScoresText()],
       ['Uygulanan Tedavi', sec('tedavi')],
       ['Prosedürler', sec('prosedur')],
       ['Sonuç / Karar', dispoSentence()],
@@ -14768,6 +14782,19 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
   render();
 
   /* ===== Klinik skor hesaplayicilari (sadece yan panel, ana nota dahil edilmez) ===== */
+  // NEWS2 parametre puanları (Scale 1). Hem toplam hem "tek parametrede 3 puan" kontrolü için ayrı tutulur.
+  function news2Params(v){
+    const rr=parseFloat(v.rr), spo2=parseFloat(v.spo2), sbp=parseFloat(v.sbp), hr=parseFloat(v.hr), temp=parseFloat(v.temp);
+    const p=[];
+    if(!isNaN(rr))   p.push(rr<=8?3:rr<=11?1:rr<=20?0:rr<=24?2:3);
+    if(!isNaN(spo2)) p.push(spo2>=96?0:spo2>=94?1:spo2>=92?2:3);
+    p.push(v.o2==='oksijen'?2:0);
+    if(!isNaN(sbp))  p.push(sbp<=90?3:sbp<=100?2:sbp<=110?1:sbp<=219?0:3);
+    if(!isNaN(hr))   p.push(hr<=40?3:hr<=50?1:hr<=90?0:hr<=110?1:hr<=130?2:3);
+    p.push(v.acvpu==='degisik'?3:0);
+    if(!isNaN(temp)) p.push(temp<=35?3:temp<=36?1:temp<=38?0:temp<=39?1:2);
+    return p;
+  }
   const clinicalScores=[
     {id:'abcd2',name:'ABCD2',fields:[
       {key:'age60',label:'Yaş ≥ 60',type:'check',points:1},
@@ -14828,6 +14855,20 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
       if(score===1)return 'Düşük-orta risk - bireysel değerlendirme (tek başına cinsiyet puanıysa düşük risk)';
       return 'Antikoagülasyon genellikle önerilir (skor ≥2)';
     }},
+    {id:'hasbled',name:'HAS-BLED (kanama riski)',fields:[
+      {key:'htn',label:'Kontrolsüz hipertansiyon (SKB >160 mmHg)',type:'check',points:1},
+      {key:'renal',label:'Anormal böbrek fonksiyonu (diyaliz, transplant veya Cr >2,26 mg/dL)',type:'check',points:1},
+      {key:'liver',label:'Anormal karaciğer fonksiyonu (siroz veya bilirubin >2x + transaminaz >3x)',type:'check',points:1},
+      {key:'stroke',label:'İnme öyküsü',type:'check',points:1},
+      {key:'bleeding',label:'Kanama öyküsü veya yatkınlık (anemi)',type:'check',points:1},
+      {key:'labil',label:'Labil INR (terapötik aralıkta zaman <%60)',type:'check',points:1},
+      {key:'elderly',label:'Yaş > 65',type:'check',points:1},
+      {key:'drugs',label:'İlaç: antiplatelet veya NSAİİ',type:'check',points:1},
+      {key:'alcohol',label:'Alkol ≥ 8 ünite/hafta',type:'check',points:1},
+    ],interpret:(score)=>{
+      if(score<=2)return 'Düşük-orta kanama riski';
+      return 'Yüksek kanama riski (skor ≥3) — antikoagülasyonda dikkat; düzeltilebilir faktörleri gözden geçir ve düzenli takip et';
+    }},
     {id:'curb65',name:'CURB-65',fields:[
       {key:'confusion',label:'Konfüzyon (yeni başlangıç)',type:'check',points:1},
       {key:'urea',label:'Üre >7 mmol/L (BUN >19 mg/dL)',type:'check',points:1},
@@ -14880,6 +14921,22 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
     ],interpret:(score)=>{
       if(score>=2)return 'Yüksek risk - kötü prognoz/sepsis için ileri değerlendirme';
       return 'Düşük risk (klinik şüphe sürerse izlem devam etmeli)';
+    }},
+    {id:'news2',name:'NEWS2',fields:[
+      {key:'rr',label:'Solunum sayısı (/dk)',type:'number',placeholder:'18'},
+      {key:'spo2',label:'SpO₂ (%) — Ölçek 1',type:'number',placeholder:'97'},
+      {key:'o2',label:'Oksijen desteği',type:'select',options:[{label:'Oda havası',value:'hava'},{label:'Oksijen alıyor',value:'oksijen'}]},
+      {key:'sbp',label:'Sistolik KB (mmHg)',type:'number',placeholder:'120'},
+      {key:'hr',label:'Nabız (/dk)',type:'number',placeholder:'80'},
+      {key:'acvpu',label:'Bilinç (ACVPU)',type:'select',options:[{label:'Alert (uyanık)',value:'alert'},{label:'Konfüzyon / Verbal / Ağrı / Yanıtsız',value:'degisik'}]},
+      {key:'temp',label:'Ateş (°C)',type:'number',placeholder:'36.8'},
+    ],compute:(v)=>news2Params(v).reduce((a,b)=>a+b,0),interpret:(score,v)=>{
+      const tek3=news2Params(v).some(x=>x===3);
+      if(score>=7)return 'Yüksek risk — acil/kritik bakım değerlendirmesi, sürekli monitorizasyon';
+      if(score>=5)return 'Orta risk — acil hekim değerlendirmesi, en az saatlik izlem';
+      if(tek3)return 'Düşük-orta risk (tek bir parametrede 3 puan) — acil hekim değerlendirmesi';
+      if(score>=1)return 'Düşük risk — 4-6 saatte bir izlem';
+      return 'Çok düşük risk — rutin izlem';
     }},
     {id:'gbs',name:'Glasgow-Blatchford',fields:[
       {key:'sex',label:'Cinsiyet',type:'select',options:[{label:'Erkek',value:'M'},{label:'Kadın',value:'F'}]},
@@ -14945,6 +15002,20 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
       const dichot=score<2?'DVT olası değil — D-dimer ile ekarte edilebilir':'DVT olası — kompresyon USG önerilir';
       return `${tier}. ${dichot} (basitleştirilmiş eşik: 2)`;
     }},
+    {id:'perc',name:'PERC (PE ekartasyon)',decision:true,compute:()=>0,fields:[
+      {key:'age50',label:'Yaş ≥ 50',type:'check'},
+      {key:'hr100',label:'Nabız ≥ 100/dk',type:'check'},
+      {key:'spo2',label:'Oda havasında SpO₂ < %95',type:'check'},
+      {key:'legswell',label:'Tek taraflı bacak şişliği',type:'check'},
+      {key:'hemoptysis',label:'Hemoptizi',type:'check'},
+      {key:'surgery',label:'Son 4 haftada cerrahi veya travma (genel anestezi)',type:'check'},
+      {key:'priorvte',label:'Önceki DVT / PE öyküsü',type:'check'},
+      {key:'hormone',label:'Östrojen kullanımı (oral kontraseptif, HRT)',type:'check'},
+    ],interpret:(s,v)=>{
+      const pos=['age50','hr100','spo2','legswell','hemoptysis','surgery','priorvte','hormone'].filter(k=>v[k]).length;
+      if(pos===0)return 'Tüm 8 kriter negatif → PERC negatif; yalnızca düşük klinik olasılıkta PE ekarte edilir, ileri test gereksiz';
+      return `${pos} kriter pozitif → PERC ile ekarte edilemez; D-dimer / ileri değerlendirme gerekir`;
+    }},
     {id:'nexus',name:'NEXUS (Servikal)',decision:true,fields:[
       {key:'tender',label:'Orta hat servikal vertebral hassasiyet',type:'check',points:1},
       {key:'deficit',label:'Fokal nörolojik defisit',type:'check',points:1},
@@ -14972,6 +15043,31 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
       if(!low)return 'Güvenli hareket açıklığı değerlendirmesine izin veren düşük-risk faktörü yok → radyografi endike';
       if(v.rom)return 'Düşük-risk var + boyun 45° sağ-sol dönüyor → görüntülemeye gerek yok';
       return 'Boyun 45° çevrilemiyor → radyografi endike';
+    }},
+    {id:'ottawaAnkle',name:'Ottawa Ayak Bileği / Ayak',decision:true,compute:()=>0,fields:[
+      {key:'latMall',label:'Lateral malleol arka kenar / uç hassasiyeti (distal 6 cm)',type:'check'},
+      {key:'medMall',label:'Medial malleol arka kenar / uç hassasiyeti (distal 6 cm)',type:'check'},
+      {key:'mt5',label:'5. metatars tabanı hassasiyeti',type:'check'},
+      {key:'navicular',label:'Navikula hassasiyeti',type:'check'},
+      {key:'weight',label:'Ağırlık taşıyamıyor (olay anında ve acilde 4 adım atamıyor)',type:'check'},
+    ],interpret:(s,v)=>{
+      const ankle=v.latMall||v.medMall||v.weight;
+      const foot=v.mt5||v.navicular||v.weight;
+      const out=[];
+      if(ankle)out.push('ayak bileği grafisi');
+      if(foot)out.push('ayak (orta ayak) grafisi');
+      if(!out.length)return 'Kriter yok → radyografi gerekmez (duyarlılık ~%98-100)';
+      return 'Pozitif kriter → '+out.join(' + ')+' endike';
+    }},
+    {id:'ottawaKnee',name:'Ottawa Diz',decision:true,compute:()=>0,fields:[
+      {key:'age55',label:'Yaş ≥ 55',type:'check'},
+      {key:'fibula',label:'Fibula başı hassasiyeti',type:'check'},
+      {key:'patella',label:'İzole patella hassasiyeti',type:'check'},
+      {key:'flex90',label:'Dizini 90° fleksiyona getiremiyor',type:'check'},
+      {key:'weight',label:'Ağırlık taşıyamıyor (olay anında ve acilde 4 adım atamıyor)',type:'check'},
+    ],interpret:(s,v)=>{
+      const pos=v.age55||v.fibula||v.patella||v.flex90||v.weight;
+      return pos?'Pozitif kriter → diz grafisi endike':'Kriter yok → radyografi gerekmez (duyarlılık ~%98-100)';
     }},
     {id:'pecarn2',name:'PECARN Kafa (<2 yaş)',decision:true,compute:()=>0,fields:[
       {key:'gcs',label:'GKS ≤14 veya mental durum değişikliği (ajitasyon, somnolans, tekrarlayan soru, yavaş yanıt)',type:'check'},
@@ -15061,12 +15157,30 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
         });
         const score=def.compute?def.compute(v):defaultScoreCompute(def,v);
         result.textContent=def.decision?def.interpret(score,v):`Skor: ${score} — ${def.interpret(score,v)}`;
+        if(includedScores.has(def.id))render();
       }
       body.querySelectorAll('[data-key]').forEach(el=>{
         el.addEventListener('input',recalc);
         el.addEventListener('change',recalc);
       });
       recalc();
+      // "✅ Epikrize ekle": basınca skor sonucu raporun "Klinik Skorlar" satırına işlenir; tekrar basınca kaldırılır.
+      scoreGetters.set(def.id,{name:def.name,get:()=>result.textContent});
+      const addBtn=document.createElement('button');
+      addBtn.type='button';
+      addBtn.className='score-add';
+      const syncAddBtn=()=>{
+        const on=includedScores.has(def.id);
+        addBtn.textContent=on?'✅ Epikrize eklendi — kaldır':'✅ Epikrize ekle';
+        addBtn.classList.toggle('added',on);
+      };
+      addBtn.addEventListener('click',()=>{
+        if(includedScores.has(def.id))includedScores.delete(def.id); else includedScores.add(def.id);
+        syncAddBtn();
+        render();
+      });
+      syncAddBtn();
+      body.appendChild(addBtn);
       // CHA2DS2-VASc yaş seçenekleri mutual exclusion (≥75 ve 65-74 aynı anda seçilemez)
       if(def.id==='chads'){
         const cb75=body.querySelector('[data-key="age75"]');

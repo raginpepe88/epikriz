@@ -22,6 +22,8 @@ function slice(startMarker, endMarker) {
 // clinicalScores dizisi + defaultScoreCompute
 eval(slice('const clinicalScores=[', '\n  ];').replace('const clinicalScores=', 'globalThis.clinicalScores='));
 eval(slice('function defaultScoreCompute', '\n  }').replace('function defaultScoreCompute', 'globalThis.defaultScoreCompute=function'));
+// NEWS2 puanlama yardımcısı (news2 compute/interpret bunu çağırır)
+eval(slice('function news2Params', '\n  }').replace('function news2Params', 'globalThis.news2Params=function'));
 
 // recalc mantığını taklit et: skor + yorum
 function scoreText(id, v) {
@@ -31,8 +33,8 @@ function scoreText(id, v) {
   return def.decision ? def.interpret(score, v) : `Skor: ${score} — ${def.interpret(score, v)}`;
 }
 
-console.log('clinicalScores yüklendi:', clinicalScores.length, '(15 beklenir)');
-check('skor sayısı = 15', clinicalScores.length === 15, String(clinicalScores.length));
+console.log('clinicalScores yüklendi:', clinicalScores.length, '(20 beklenir)');
+check('skor sayısı = 20', clinicalScores.length === 20, String(clinicalScores.length));
 
 /* ---- KLİNİK SKORLAR ---- */
 const SCORE_TESTS = [
@@ -69,6 +71,19 @@ const SCORE_TESTS = [
   ['centor', { age: 0 }, 'Skor: 0'],
   ['centor', { exudate: true, nodes: true, fever: true, cough: true, age: 0 }, 'Skor: 4'],
   ['centor', { age: -1 }, 'Skor: -1'],
+  // --- yeni eklenen skorlar ---
+  ['hasbled', { htn: true, stroke: true }, 'Skor: 2'],
+  ['hasbled', { htn: true, renal: true, stroke: true }, 'Yüksek kanama'],
+  ['news2', { rr: 18, spo2: 97, o2: 'hava', sbp: 120, hr: 80, acvpu: 'alert', temp: 36.8 }, 'Çok düşük risk'],
+  ['news2', { rr: 28, spo2: 90, o2: 'oksijen', sbp: 85, hr: 135, acvpu: 'degisik', temp: 39.5 }, 'Yüksek risk'],
+  ['news2', { rr: 26 }, 'tek bir parametrede 3 puan'],
+  ['perc', {}, 'PERC negatif'],
+  ['perc', { age50: true }, '1 kriter pozitif'],
+  ['ottawaAnkle', {}, 'radyografi gerekmez'],
+  ['ottawaAnkle', { latMall: true }, 'ayak bileği grafisi'],
+  ['ottawaAnkle', { mt5: true }, 'ayak (orta ayak) grafisi'],
+  ['ottawaKnee', {}, 'radyografi gerekmez'],
+  ['ottawaKnee', { age55: true }, 'diz grafisi endike'],
 ];
 for (const [id, v, exp] of SCORE_TESTS) {
   const r = scoreText(id, v);
