@@ -528,8 +528,7 @@ html[data-theme="light"] .feedback-status,html[data-theme="light"] .feedback-cou
 <body>
 
 <div class="topbar">
-  <div class="brand" aria-label="Acil Epikriz"><span class="dot"></span> 𝔄𝔠𝔦𝔩 𝔈𝔭𝔦𝔨𝔯𝔦𝔷</div>
-  <span class="kvkk" id="kvkkBadge">Veriler cihazinizdan cikmaz</span>
+  <div class="brand" aria-label="Acil Epikriz" role="button" tabindex="0" title="Ana sayfaya dön" onclick="showLanding()" style="cursor:pointer;"><span class="dot"></span> 𝔄𝔠𝔦𝔩 𝔈𝔭𝔦𝔨𝔯𝔦𝔷</div>
   <div class="spacer"></div>
   <button class="btn" id="btnSenkron" onclick="openSyncModal()" style="display:none;">🔄 Senkron<span class="auto-sync-dot" id="autoSyncDot" hidden title="Otomatik senkron açık"></span></button>
   <button class="btn" id="btnYeniHasta" onclick="resetAll()" style="display:none;">Yeni Hasta</button>
@@ -15972,22 +15971,8 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
   };
   updateThanksDisplay();
 
-  // Üstteki gizlilik rozetini gerçek senkron durumuna göre günceller (yanıltıcı
-  // "veriler çıkmaz" iddiasını önler).
-  function updatePrivacyBadge(){
-    const el=document.getElementById('kvkkBadge');
-    if(!el)return;
-    if(autoSyncEnabled){
-      el.textContent='⚠ Otomatik senkron açık — veriler şifreli sunucuya gönderiliyor';
-      el.title='Form verileri (kimlik içermez) şifrelenip geçici olarak bir sunucuya gönderiliyor.';
-    }else if(everSynced){
-      el.textContent='Senkron kullanıldı — veriler şifreli sunucuya gönderildi';
-      el.title='Bu oturumda en az bir kez veri şifrelenip sunucuya gönderildi.';
-    }else{
-      el.textContent='Veriler cihazdan çıkmaz (senkron kapalı)';
-      el.title='Senkron kullanılmadığı sürece veriler bu cihazdan çıkmaz.';
-    }
-  }
+  // Gizlilik/senkron durum rozeti kaldırıldı (kullanıcı isteği). Çağrı yerleri için inert.
+  function updatePrivacyBadge(){}
 
   function loadAutoSyncPref(){
     try{return localStorage.getItem(AUTO_SYNC_KEY)==='1';}catch(e){return false;}
