@@ -528,7 +528,7 @@ html[data-theme="light"] .feedback-status,html[data-theme="light"] .feedback-cou
 <body>
 
 <div class="topbar">
-  <div class="brand" aria-label="Acil Epikriz" role="button" tabindex="0" title="Ana sayfaya dön" onclick="showLanding()" style="cursor:pointer;"><span class="dot"></span> 𝔄𝔠𝔦𝔩 𝔈𝔭𝔦𝔨𝔯𝔦𝔷</div>
+  <div class="brand" aria-label="Acil Epikriz" role="button" tabindex="0" title="Ana sayfaya dön" onclick="showLanding()" style="cursor:pointer;"><span class="dot"></span> <span class="brand-emoji">👨🏻‍⚕️🩺👩🏻‍⚕️</span> 𝔄𝔠𝔦𝔩 𝔈𝔭𝔦𝔨𝔯𝔦𝔷</div>
   <div class="spacer"></div>
   <button class="btn" id="btnSenkron" onclick="openSyncModal()" style="display:none;">🔄 Senkron<span class="auto-sync-dot" id="autoSyncDot" hidden title="Otomatik senkron açık"></span></button>
   <button class="btn" id="btnYeniHasta" onclick="resetAll()" style="display:none;">Yeni Hasta</button>
@@ -14014,7 +14014,7 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
   // Açık (yelpaze) el geometrisi — çizim ve zone aynı noktaları kullanır.
   function handFingers(wx){
     const mir=wx<100?1:-1, X=dx=>wx+mir*dx, by=318;
-    const defs=[{n:2,bdx:7,ang:-7,len:64},{n:3,bdx:2,ang:-17,len:70},{n:4,bdx:-3,ang:-27,len:66},{n:5,bdx:-8,ang:-38,len:56}];
+    const defs=[{n:5,bdx:7,ang:-7,len:64},{n:4,bdx:2,ang:-17,len:70},{n:3,bdx:-3,ang:-27,len:66},{n:2,bdx:-8,ang:-38,len:56}];
     return defs.map(d=>{
       const bx=X(d.bdx), a=mir*d.ang*Math.PI/180, tx=bx+Math.sin(a)*d.len, ty=by+Math.cos(a)*d.len;
       const at=f=>({x:bx+(tx-bx)*f,y:by+(ty-by)*f});
