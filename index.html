@@ -111,20 +111,6 @@
   @keyframes gx-shake{0%,44%,66%,100%{transform:translate(0,0)}48%{transform:translate(-3px,2px)}52%{transform:translate(3px,-1px)}56%{transform:translate(-2px,1px)}}
   @keyframes gx-glow{0%,38%{opacity:.5}48%{opacity:1}60%,100%{opacity:.75}}
   @keyframes gx-textpulse{0%,40%{transform:scale(.92);opacity:.6}50%{transform:scale(1.08);opacity:1}60%,100%{transform:scale(1);opacity:1}}
-  .morse-panel{width:440px;max-width:92vw;background:var(--face);border:2px solid;border-color:var(--light) var(--dark) var(--dark) var(--light);box-shadow:inset 1px 1px 0 var(--hl);padding:16px 20px;text-align:left;max-height:86vh;overflow:auto;}
-  .morse-panel h2{font-size:16px;margin:0 0 12px;text-align:center;}
-  .morse-item{margin-bottom:12px;}
-  .morse-q{font-size:13px;font-weight:700;margin-bottom:4px;}
-  .morse-opt{display:flex;align-items:center;gap:6px;font-size:13px;padding:2px 0;cursor:pointer;}
-  .morse-opt input{margin:0;}
-  .morse-result{margin-top:6px;border-top:1px solid var(--shadow);padding-top:10px;text-align:center;}
-  .morse-total{font-size:14px;}
-  .morse-risk{font-size:16px;font-weight:700;margin:4px 0;}
-  .morse-risk.ok{color:#1a7a1a;} .morse-risk.warn{color:#b8860b;} .morse-risk.high{color:#b00020;}
-  .morse-rec{font-size:12px;color:var(--muted);}
-  .morse-kabul{width:100%;box-sizing:border-box;border:2px solid;border-color:var(--shadow) var(--light) var(--light) var(--shadow);padding:5px 7px;font-size:13px;}
-  .morse-export-status{font-size:12px;color:#1a7a1a;margin-top:8px;min-height:14px;text-align:center;}
-  .morse-undo-btn{color:#b00020;font-weight:700;}
 
   .mode-switch-row{display:flex;align-items:center;gap:8px;margin-bottom:12px;text-transform:none;}
   .mode-switch-row .mode-label{font-size:11px;font-weight:700;background:var(--face);padding:3px 8px;
@@ -468,7 +454,7 @@
 .sync-qr-box .sync-qr-label{color:#333;}
 
 /* all data-entry fields -> dark field */
-.txt,.extra,select.txt,.para-inp,.login-panel input,.morse-kabul,.sync-code-box input,#icdSearch,.feedback-box textarea{background:var(--field);color:var(--field-ink);}
+.txt,.extra,select.txt,.para-inp,.login-panel input,.sync-code-box input,#icdSearch,.feedback-box textarea{background:var(--field);color:var(--field-ink);}
 
 /* selected chips pick up teal; abnormal exam findings stay red */
 .chip.active{color:var(--accent);}
@@ -481,16 +467,12 @@
 .info-box{background:#33301f;color:#e6d9a8;}
 .modal-warn{background:#33301f;color:#e6d9a8;}
 
-/* status + risk colors brightened for dark */
-.morse-risk.ok{color:#5bd16a;} .morse-risk.warn{color:#e0b84a;} .morse-risk.high{color:var(--danger);}
-.morse-export-status{color:#5bd16a;}
-.morse-undo-btn{color:var(--danger);}
 .score-add.added{background:#1f3a26;color:#7fdc8c;border-color:#2f5a3a;}
 .allnorm-btn.on{background:#1f3a26;color:#7fdc8c;}
 .sync-status.ok{color:#5bd16a;} .sync-status.err{color:#ff7a7a;}
 .login-err{color:#ff7a7a;}
 .sync-link{color:var(--accent);} .sync-link:hover{color:#37c4a8;}
-.feedback-status,.feedback-count,.morse-rec{color:var(--muted);}
+.feedback-status,.feedback-count{color:var(--muted);}
 
 /* ===== landing theme switch ===== */
 .theme-switch-row{display:flex;align-items:center;gap:10px;text-transform:none;}
@@ -521,11 +503,6 @@ html[data-theme="light"] .placeholder-doc{color:#808080;}
 html[data-theme="light"] .bm-wrap{background:#fff;}
 html[data-theme="light"] .bm-readout{background:#fff;color:#000;}
 html[data-theme="light"] .bm-cap{color:#333;}
-html[data-theme="light"] .morse-risk.ok{color:#1a7a1a;}
-html[data-theme="light"] .morse-risk.warn{color:#b8860b;}
-html[data-theme="light"] .morse-risk.high{color:#b00020;}
-html[data-theme="light"] .morse-export-status{color:#1a7a1a;}
-html[data-theme="light"] .morse-undo-btn{color:#b00020;}
 html[data-theme="light"] .score-add.added{background:#d7f0d7;color:#1a5a1a;border-color:#3a7a3a;}
 html[data-theme="light"] .allnorm-btn.on{background:#d7f0d7;color:#1a5a1a;}
 html[data-theme="light"] .sync-status.ok{color:#006400;}
@@ -533,7 +510,7 @@ html[data-theme="light"] .sync-status.err{color:#a40000;}
 html[data-theme="light"] .login-err{color:#b00020;}
 html[data-theme="light"] .sync-link{color:#00009c;}
 html[data-theme="light"] .sync-link:hover{color:#0000ff;}
-html[data-theme="light"] .feedback-status,html[data-theme="light"] .feedback-count,html[data-theme="light"] .morse-rec{color:#333;}
+html[data-theme="light"] .feedback-status,html[data-theme="light"] .feedback-count{color:#333;}
 </style>
 <script>
   window.setTheme=function(t){
@@ -685,7 +662,6 @@ html[data-theme="light"] .feedback-status,html[data-theme="light"] .feedback-cou
     <input type="text" id="adminUser" placeholder="kullanıcı adı (ör. nurse1)" autocomplete="off">
     <input type="text" id="adminName" placeholder="Görünen ad (opsiyonel)" autocomplete="off">
     <div class="admin-tools">
-      <label><input type="checkbox" value="falls"> Falls Score</label>
       <label><input type="checkbox" value="dahili"> Acil Dahili Hasta</label>
       <label><input type="checkbox" value="adli"> Adli Muayene</label>
       <label><input type="checkbox" value="travma"> Travma</label>
@@ -699,30 +675,6 @@ html[data-theme="light"] .feedback-status,html[data-theme="light"] .feedback-cou
     <div id="adminList"></div>
     <div class="login-actions" style="margin-top:10px;">
       <button type="button" onclick="hideAdminPanel()" title="Geri">←</button>
-    </div>
-  </div>
-</div>
-
-<div class="landing" id="morseForm" style="display:none;">
-  <div class="morse-panel">
-    <h2>Morse Düşme Skalası</h2>
-    <div class="morse-item">
-      <div class="morse-q">Kabul No</div>
-      <input type="text" id="morseKabulNo" class="morse-kabul" placeholder="Hasta kabul numarası">
-    </div>
-    <div id="morseItems"></div>
-    <div class="morse-result" id="morseResult"></div>
-    <div class="login-actions">
-      <button type="button" onclick="hideMorseForm()">← Geri</button>
-      <button type="button" onclick="resetMorse()">Temizle</button>
-      <button type="button" onclick="morseExport()">Gönder</button>
-    </div>
-    <div class="login-actions" style="margin-top:8px;">
-      <button type="button" onclick="morseExcel()">📥 Excel indir (tüm kayıtlar)</button>
-    </div>
-    <div class="morse-export-status" id="morseExportStatus"></div>
-    <div class="login-actions" id="morseUndoRow" style="display:none;margin-top:6px;">
-      <button type="button" class="morse-undo-btn" onclick="morseDeleteLast()">🗑 Son gönderiyi sil</button>
     </div>
   </div>
 </div>
@@ -12766,6 +12718,7 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
     landing.style.display='none';
     document.getElementById('testLanding').style.display='none';
     document.getElementById('testLogin').style.display='none';
+    document.getElementById('adminPanel').style.display='none';
     appBody.style.display='flex';
     document.getElementById('btnYeniHasta').style.display='';
     document.getElementById('btnSil').style.display='';
@@ -12882,14 +12835,12 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
     localStorage.removeItem('epikriz_session');
     document.getElementById('testLanding').style.display='none';
     document.getElementById('testLogin').style.display='none';
-    document.getElementById('morseForm').style.display='none';
     document.getElementById('adminPanel').style.display='none';
     landing.style.display='flex';
   };
   // Kullanıcı bazlı "Araçlar": her kullanıcının göreceği araçlar Supabase
   // user_metadata.tools (ya da app_metadata.tools) dizisinden gelir; tanımsızsa varsayılan.
   const TOOL_REGISTRY={
-    falls:{label:'Falls Score', fn:()=>window.showMorseForm()},
     dahili:{label:'🏥 Acil Dahili Hasta', fn:()=>window.selectMode('dahili')},
     adli:{label:'⚖️ Adli Muayene', fn:()=>window.selectMode('adli')},
     travma:{label:'🚑 Travma', fn:()=>window.selectMode('travma')},
@@ -12904,7 +12855,7 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
     const hello=document.getElementById('testHello');
     if(hello)hello.textContent=name?`Merhaba, ${name}`:'Araçlar';
     host.innerHTML='';
-    (tools&&tools.length?tools:['falls']).forEach(key=>{
+    (tools&&tools.length?tools:[]).forEach(key=>{
       const t=TOOL_REGISTRY[key]; if(!t)return;
       const b=document.createElement('button'); b.type='button'; b.className='test-login-btn'; b.textContent=t.label;
       b.addEventListener('click',t.fn); host.appendChild(b);
@@ -12921,7 +12872,7 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
     renderToolsButtons(Array.isArray(meta.tools)&&meta.tools.length?meta.tools:null, meta.display_name||uname);
     if(!uname)return;
     try{
-      const res=await fetch(`${SUPABASE_URL}/rest/v1/user_tools?username=eq.${encodeURIComponent(uname)}&select=tools,display_name`,{headers:fallsAuthHeaders()});
+      const res=await fetch(`${SUPABASE_URL}/rest/v1/user_tools?username=eq.${encodeURIComponent(uname)}&select=tools,display_name`,{headers:apiHeaders()});
       if(res.ok){const rows=await res.json(); if(rows&&rows[0]) renderToolsButtons(rows[0].tools, rows[0].display_name||meta.display_name||uname);}
     }catch(e){}
   }
@@ -12953,7 +12904,7 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
     const host=document.getElementById('adminList'); if(!host)return;
     host.textContent='Yükleniyor…';
     try{
-      const res=await fetch(`${SUPABASE_URL}/rest/v1/user_tools?select=*&order=username.asc`,{headers:fallsAuthHeaders()});
+      const res=await fetch(`${SUPABASE_URL}/rest/v1/user_tools?select=*&order=username.asc`,{headers:apiHeaders()});
       if(!res.ok){const d=await res.json().catch(()=>({}));host.textContent='Liste alınamadı: '+(d.message||('HTTP '+res.status));return;}
       const rows=await res.json();
       host.innerHTML='';
@@ -12975,7 +12926,7 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
     const tools=[...document.querySelectorAll('#adminPanel .admin-tools input:checked')].map(c=>c.value);
     status.style.color='#333';status.textContent='Kaydediliyor…';
     try{
-      const res=await fetch(`${SUPABASE_URL}/rest/v1/user_tools`,{method:'POST',headers:{...fallsAuthHeaders(),'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({username:uname,tools,display_name:name||null})});
+      const res=await fetch(`${SUPABASE_URL}/rest/v1/user_tools`,{method:'POST',headers:{...apiHeaders(),'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({username:uname,tools,display_name:name||null})});
       if(res.ok){status.style.color='#1a7a1a';status.textContent='Kaydedildi: '+uname;adminLoadList();}
       else{const d=await res.json().catch(()=>({}));status.style.color='#b00020';status.textContent='Kaydedilemedi: '+(d.message||d.hint||('HTTP '+res.status));}
     }catch(e){status.style.color='#b00020';status.textContent='Bağlantı hatası.';}
@@ -12984,118 +12935,18 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
     if(!confirm(uname+' kaydı silinsin mi?'))return;
     const status=document.getElementById('adminStatus');
     try{
-      const res=await fetch(`${SUPABASE_URL}/rest/v1/user_tools?username=eq.${encodeURIComponent(uname)}`,{method:'DELETE',headers:fallsAuthHeaders()});
+      const res=await fetch(`${SUPABASE_URL}/rest/v1/user_tools?username=eq.${encodeURIComponent(uname)}`,{method:'DELETE',headers:apiHeaders()});
       if(res.ok){status.style.color='#1a7a1a';status.textContent='Silindi: '+uname;adminLoadList();}
       else{const d=await res.json().catch(()=>({}));status.style.color='#b00020';status.textContent='Silinemedi: '+(d.message||('HTTP '+res.status));}
     }catch(e){status.style.color='#b00020';status.textContent='Bağlantı hatası.';}
   };
 
-  // ---- Morse Düşme Skalası (Falls Score) ----
-  const MORSE_ITEMS=[
-    {key:'history', label:'1. Düşme öyküsü (hemen veya son 3 ay)', opts:[['Hayır',0],['Evet',25]]},
-    {key:'secondary', label:'2. İkincil tanı (birden fazla tıbbi tanı)', opts:[['Hayır',0],['Evet',15]]},
-    {key:'aid', label:'3. Yürüme yardımcısı', opts:[['Yok / yatak istirahati / hemşire yardımı',0],['Koltuk değneği / baston / walker',15],['Mobilyaya tutunarak',30]]},
-    {key:'iv', label:'4. IV / Heparin kilidi', opts:[['Hayır',0],['Evet',20]]},
-    {key:'gait', label:'5. Yürüyüş / transfer', opts:[['Normal / yatak istirahati / immobil',0],['Zayıf',10],['Bozuk',20]]},
-    {key:'mental', label:'6. Mental durum', opts:[['Kendi yeteneğinin farkında',0],['Kısıtlılıklarını unutuyor',15]]},
-  ];
-  function buildMorse(){
-    const c=document.getElementById('morseItems');
-    if(!c||c.dataset.built)return;
-    c.innerHTML=MORSE_ITEMS.map(it=>`<div class="morse-item"><div class="morse-q">${it.label}</div>`+
-      it.opts.map((o,i)=>`<label class="morse-opt"><input type="radio" name="morse_${it.key}" value="${o[1]}"${i===0?' checked':''}> ${o[0]} <b>(${o[1]})</b></label>`).join('')+`</div>`).join('');
-    c.dataset.built='1';
-    c.addEventListener('change',computeMorse);
-  }
-  function computeMorse(){
-    let total=0;
-    MORSE_ITEMS.forEach(it=>{const sel=document.querySelector(`input[name="morse_${it.key}"]:checked`); if(sel)total+=+sel.value;});
-    let risk,cls,rec;
-    if(total<=24){risk='Risk yok';cls='ok';rec='';}
-    else if(total<=50){risk='Düşük risk';cls='warn';rec='Standart düşme önleme girişimleri.';}
-    else{risk='Yüksek risk';cls='high';rec='Yüksek riskli düşme önleme girişimleri.';}
-    document.getElementById('morseResult').innerHTML=`<div class="morse-total">Toplam: <b>${total}</b> / 125</div><div class="morse-risk ${cls}">${risk}</div><div class="morse-rec">${rec}</div>`;
-  }
-  window.showMorseForm=function(){
-    buildMorse(); computeMorse(); morseUndoHide();
-    document.getElementById('morseExportStatus').textContent='';
-    document.getElementById('testLanding').style.display='none';
-    document.getElementById('morseForm').style.display='flex';
-  };
-  window.hideMorseForm=function(){
-    document.getElementById('morseForm').style.display='none';
-    renderTools();
-    document.getElementById('testLanding').style.display='flex';
-  };
-  window.resetMorse=function(){
-    MORSE_ITEMS.forEach(it=>{const first=document.querySelector(`input[name="morse_${it.key}"]`); if(first)first.checked=true;});
-    document.getElementById('morseKabulNo').value='';
-    document.getElementById('morseExportStatus').textContent='';
-    morseUndoHide();
-    computeMorse();
-  };
-  // Falls kayıtları Supabase'de: Gönder=POST, Excel indir=Supabase'den çekip CSV. Giriş JWT'siyle kimlikli.
-  let lastFallsId=null;
-  function morseUndoHide(){ const r=document.getElementById('morseUndoRow'); if(r)r.style.display='none'; lastFallsId=null; }
-  function fallsAuthHeaders(){
+  // Supabase REST için JWT'li başlıklar (admin paneli kullanır).
+  function apiHeaders(){
     let token=SUPABASE_KEY;
     try{const s=JSON.parse(localStorage.getItem('epikriz_session')); if(s&&s.access_token)token=s.access_token;}catch(e){}
     return {'apikey':SUPABASE_KEY,'Authorization':`Bearer ${token}`,'Content-Type':'application/json'};
   }
-  window.morseExport=async function(){
-    const status=document.getElementById('morseExportStatus');
-    const kabul=(document.getElementById('morseKabulNo').value||'').trim();
-    if(!kabul){status.style.color='#b00020';status.textContent='Önce Kabul No girin.';return;}
-    let total=0; const sc={};
-    MORSE_ITEMS.forEach(it=>{const s=document.querySelector(`input[name="morse_${it.key}"]:checked`);sc[it.key]=+s.value;total+=+s.value;});
-    const risk=total<=24?'Risk yok':total<=50?'Düşük risk':'Yüksek risk';
-    let ekleyen='';
-    try{const s=JSON.parse(localStorage.getItem('epikriz_session')); if(s&&s.user&&s.user.email){const e=s.user.email; ekleyen=e.endsWith(AUTH_DOMAIN)?e.slice(0,-AUTH_DOMAIN.length):e;}}catch(e){}
-    const rec={kabul_no:kabul,dusme_oykusu:sc.history,ikincil_tani:sc.secondary,yurume_yardimcisi:sc.aid,iv_heparin:sc.iv,yuruyus:sc.gait,mental:sc.mental,total,risk,ekleyen};
-    status.style.color='#333';status.textContent='Gönderiliyor…';
-    morseUndoHide();
-    try{
-      const res=await fetch(`${SUPABASE_URL}/rest/v1/falls_records`,{method:'POST',headers:{...fallsAuthHeaders(),'Prefer':'return=representation'},body:JSON.stringify(rec)});
-      if(res.ok){
-        const arr=await res.json().catch(()=>[]); lastFallsId=(arr&&arr[0]&&arr[0].id!=null)?arr[0].id:null;
-        status.style.color='#1a7a1a';status.textContent="Kaydedildi.";
-        if(lastFallsId!=null){const r=document.getElementById('morseUndoRow'); if(r)r.style.display='flex';}
-      }
-      else{const d=await res.json().catch(()=>({}));status.style.color='#b00020';status.textContent='Kaydedilemedi: '+(d.message||d.hint||('HTTP '+res.status));}
-    }catch(e){status.style.color='#b00020';status.textContent='Bağlantı hatası.';}
-  };
-  window.morseDeleteLast=async function(){
-    const status=document.getElementById('morseExportStatus');
-    if(lastFallsId==null){status.style.color='#b00020';status.textContent='Silinecek son gönderi yok.';return;}
-    status.style.color='#333';status.textContent='Siliniyor…';
-    try{
-      const res=await fetch(`${SUPABASE_URL}/rest/v1/falls_records?id=eq.${lastFallsId}`,{method:'DELETE',headers:{...fallsAuthHeaders(),'Prefer':'return=representation'}});
-      if(res.ok){
-        const arr=await res.json().catch(()=>[]);
-        if(arr&&arr.length){status.style.color='#1a7a1a';status.textContent='Silindi.';morseUndoHide();}
-        else{status.style.color='#b00020';status.textContent='Silinemedi: bu kaydı silme yetkiniz yok.';}
-      }
-      else{const d=await res.json().catch(()=>({}));status.style.color='#b00020';status.textContent='Silinemedi: '+(d.message||d.hint||('HTTP '+res.status));}
-    }catch(e){status.style.color='#b00020';status.textContent='Bağlantı hatası.';}
-  };
-  window.morseExcel=async function(){
-    const status=document.getElementById('morseExportStatus');
-    status.style.color='#333';status.textContent='Kayıtlar alınıyor…';
-    try{
-      const res=await fetch(`${SUPABASE_URL}/rest/v1/falls_records?select=*&order=created_at.asc`,{headers:fallsAuthHeaders()});
-      if(!res.ok){const d=await res.json().catch(()=>({}));status.style.color='#b00020';status.textContent='Alınamadı: '+(d.message||('HTTP '+res.status));return;}
-      const recs=await res.json();
-      if(!recs.length){status.style.color='#333';status.textContent='Henüz kayıt yok.';return;}
-      const cols=[['created_at','Tarih'],['kabul_no','Kabul No'],['ekleyen','Ekleyen'],['dusme_oykusu','Düşme öyküsü'],['ikincil_tani','İkincil tanı'],['yurume_yardimcisi','Yürüme yardımcısı'],['iv_heparin','IV/Heparin'],['yuruyus','Yürüyüş'],['mental','Mental'],['total','Toplam'],['risk','Risk']];
-      const esc=v=>`"${String(v==null?'':v).replace(/"/g,'""')}"`;
-      const lines=[cols.map(c=>esc(c[1])).join(';')];
-      recs.forEach(r=>lines.push(cols.map(c=>esc(r[c[0]])).join(';')));
-      const blob=new Blob(['﻿'+lines.join('\r\n')],{type:'text/csv;charset=utf-8;'});
-      const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='falls_records.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);
-      status.style.color='#1a7a1a';status.textContent=`${recs.length} kayıt Excel olarak indirildi.`;
-    }catch(e){status.style.color='#b00020';status.textContent='Bağlantı hatası.';}
-  };
-
   const followups={
     "göğüs ağrısı":[
       {label:"Süre",single:true,opts:["<1 saat","1-6 saat",">6 saat","birkaç gündür"]},
