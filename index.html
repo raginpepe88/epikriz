@@ -13115,6 +13115,7 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
       if(!data.basvuru_tarihi){st.style.color='#b00020';st.textContent='Başvuru tarih-saati gerekli.';return;}
       if(data.onam!=='Evet'){st.style.color='#b00020';st.textContent='Onam gerekli (Evet).';return;}
       if(!data.yas){st.style.color='#b00020';st.textContent='Yaş gerekli.';return;}
+      if(data.gks!==''&&data.gks!=null&&(parseInt(data.gks)<3||parseInt(data.gks)>15)){st.style.color='#b00020';st.textContent='GKS 3–15 arasında olmalı.';return;}
       if(data.bt_cekildi==='Hayır'&&(!data.takip_yontemi||!data.takip_tamam)){st.style.color='#b00020';st.textContent='BT çekilmediyse 30 gün takip (yöntem + tamamlandı) zorunlu.';return;}
       for(const nk of ['kontuzyon_mm','sak_mm','sdh_mm']){ const v=data[nk]; if(v!==''&&v!=null&&parseFloat(v)<0){st.style.color='#b00020';st.textContent='Ölçüm değeri negatif olamaz: '+({kontuzyon_mm:'kontüzyon çapı',sak_mm:'SAK derinliği',sdh_mm:'SDH derinliği'})[nk]+'.';return;} }
       data.fgkt_puan=fgktState.puan; data.kural_sonuc=fgktState.puan>=25?'BT endike':'BT endike değil';
