@@ -680,17 +680,13 @@ html[data-theme="light"] .sync-link:hover{color:#0000ff;}
       <button type="button" onclick="fgktClear()">Temizle</button>
       <button type="button" id="fgktSaveBtn" onclick="fgktSave()">Kaydet</button>
     </div>
-    <div class="login-actions" style="margin-top:8px;">
-      <button type="button" onclick="fgktExcel()">📥 Excel indir (tüm kayıtlar)</button>
-      <button type="button" onclick="fgktSheetSync()">📊 Google Sheet'e aktar</button>
-    </div>
     <div class="fgkt-status" id="fgktStatus"></div>
   </div>
 </div>
 
 <div class="landing" id="fdrForm" style="display:none;">
   <div class="fgkt-panel">
-    <h2>🤕 Falls Decision Rule</h2>
+    <h2>Falls Decision Rule</h2>
     <div class="fgkt-score" id="fdrResult">Falls Decision Rule: —</div>
     <div class="fgkt-sec">
       <div class="fgkt-sec-h">Kayıt</div>
@@ -725,10 +721,6 @@ html[data-theme="light"] .sync-link:hover{color:#0000ff;}
       <button type="button" onclick="hideFdrForm()" title="Geri">←</button>
       <button type="button" onclick="fdrClear()">Temizle</button>
       <button type="button" id="fdrSaveBtn" onclick="fdrSave()">Kaydet</button>
-    </div>
-    <div class="login-actions" style="margin-top:8px;">
-      <button type="button" onclick="fdrExcel()">📥 Excel indir (tüm kayıtlar)</button>
-      <button type="button" onclick="fdrSheetSync()">📊 Google Sheet'e aktar</button>
     </div>
     <div class="fgkt-status" id="fdrStatus"></div>
   </div>
@@ -12900,7 +12892,7 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
   // user_metadata.tools (ya da app_metadata.tools) dizisinden gelir; tanımsızsa varsayılan.
   const TOOL_REGISTRY={
     fgkt:{label:'🧠 FGKT-KKK Olgu Kayıt', fn:()=>window.showFgktForm()},
-    fdr:{label:'🤕 Falls Decision Rule', fn:()=>window.showFdrForm()},
+    fdr:{label:'Falls Decision Rule', fn:()=>window.showFdrForm()},
     dahili:{label:'🏥 Acil Dahili Hasta', fn:()=>window.selectMode('dahili')},
     adli:{label:'⚖️ Adli Muayene', fn:()=>window.selectMode('adli')},
     travma:{label:'🚑 Travma', fn:()=>window.selectMode('travma')},
@@ -13201,21 +13193,6 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
     if(!GSHEET_SYNC_URL||!rec)return;
     const t=fgktTable([rec]); gsheetPost({secret:GSHEET_SECRET,sheet:'FGKT',mode:'append',header:t.header,row:t.rows[0]});
   }
-  window.fgktExcel=async function(){
-    const st=document.getElementById('fgktStatus'); st.style.color='#888'; st.textContent='Kayıtlar alınıyor…';
-    try{
-      const res=await fetch(`${SUPABASE_URL}/rest/v1/fgkt_records?select=*&order=created_at.asc`,{headers:apiHeaders()});
-      if(!res.ok){const d=await res.json().catch(()=>({}));st.style.color='#b00020';st.textContent='Alınamadı: '+(d.message||('HTTP '+res.status));return;}
-      const recs=await res.json();
-      if(!recs.length){st.style.color='#888';st.textContent='Henüz kayıt yok.';return;}
-      const t=fgktTable(recs);
-      const esc=v=>`"${String(v).replace(/"/g,'""')}"`;
-      const lines=[t.header.map(esc).join(';'),...t.rows.map(r=>r.map(esc).join(';'))];
-      const blob=new Blob(['﻿'+lines.join('\r\n')],{type:'text/csv;charset=utf-8;'});
-      const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='fgkt_records.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);
-      st.style.color='#1a7a1a';st.textContent=`${recs.length} kayıt Excel olarak indirildi.`;
-    }catch(e){st.style.color='#b00020';st.textContent='Bağlantı hatası.';}
-  };
   window.fgktSheetSync=async function(silent){
     const st=document.getElementById('fgktStatus');
     const say=(c,t)=>{ if(!silent&&st){st.style.color=c;st.textContent=t;} };
@@ -13312,21 +13289,6 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
       const res=await fetch(`${SUPABASE_URL}/rest/v1/fdr_records`,{method:'POST',headers:{...apiHeaders(),'Prefer':'return=representation'},body:JSON.stringify(rec)});
       if(res.ok){ st.style.color='#1a7a1a';st.textContent='Kaydedildi: '+hasta_id; const saved=await res.json().catch(()=>null); fdrAppendOne((saved&&saved[0])||rec); }
       else{ const d=await res.json().catch(()=>({})); st.style.color='#b00020';st.textContent='Kaydedilemedi: '+(d.code==='23505'?'Hasta ID zaten var':(d.message||('HTTP '+res.status))); }
-    }catch(e){st.style.color='#b00020';st.textContent='Bağlantı hatası.';}
-  };
-  window.fdrExcel=async function(){
-    const st=document.getElementById('fdrStatus'); st.style.color='#888'; st.textContent='Kayıtlar alınıyor…';
-    try{
-      const res=await fetch(`${SUPABASE_URL}/rest/v1/fdr_records?select=*&order=created_at.asc`,{headers:apiHeaders()});
-      if(!res.ok){st.style.color='#b00020';st.textContent='Alınamadı (HTTP '+res.status+').';return;}
-      const recs=await res.json();
-      if(!recs.length){st.style.color='#888';st.textContent='Henüz kayıt yok.';return;}
-      const t=fdrTable(recs);
-      const esc=v=>`"${String(v).replace(/"/g,'""')}"`;
-      const lines=[t.header.map(esc).join(';'),...t.rows.map(r=>r.map(esc).join(';'))];
-      const blob=new Blob(['﻿'+lines.join('\r\n')],{type:'text/csv;charset=utf-8;'});
-      const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='fdr_records.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);
-      st.style.color='#1a7a1a';st.textContent=`${recs.length} kayıt Excel olarak indirildi.`;
     }catch(e){st.style.color='#b00020';st.textContent='Bağlantı hatası.';}
   };
   window.fdrSheetSync=async function(silent){
