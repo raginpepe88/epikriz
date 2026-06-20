@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mavi Kod — Gizlilik Politikası</title>
+<meta name="description" content="Mavi Kod uygulaması gizlilik politikası. Uygulama kişisel veri toplamaz; tüm kayıtlar yalnızca cihazda saklanır.">
+<meta name="theme-color" content="#070f1c">
+<style>
+  :root{
+    --bg:#070f1c; --card:#10203a; --line:#1d3357;
+    --text:#eaf1fb; --muted:#9fb2cc; --blue:#5ac3ff; --amber:#f2c14e;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:radial-gradient(1200px 600px at 50% -10%,#0d1c38 0%,var(--bg) 60%);
+    color:var(--text); line-height:1.65; -webkit-font-smoothing:antialiased;
+    min-height:100vh; display:flex; justify-content:center; padding:40px 24px;
+  }
+  .wrap{width:100%; max-width:680px}
+  .top{text-align:center; margin-bottom:26px}
+  .top svg{filter:drop-shadow(0 0 14px rgba(90,195,255,.55)); margin-bottom:12px}
+  h1{font-size:28px; font-weight:800; letter-spacing:.4px}
+  .date{color:var(--muted); font-size:13.5px; margin-top:6px}
+  .card{
+    background:linear-gradient(180deg,var(--card),#0e1b32);
+    border:1px solid var(--line); border-radius:16px; padding:20px 24px; margin-top:14px;
+  }
+  .card h2{font-size:16px; font-weight:700; margin-bottom:8px; color:var(--blue)}
+  .card p{font-size:15px; margin-bottom:8px}
+  .card p:last-child{margin-bottom:0}
+  ul{margin:6px 0 0 18px} li{font-size:15px; margin-bottom:5px}
+  a{color:var(--blue); text-decoration:none} a:hover{text-decoration:underline}
+  .lead{color:var(--muted); font-size:15px; text-align:center; margin-bottom:8px}
+  .back{display:inline-block; margin-top:6px; font-size:14px}
+  footer{text-align:center; color:var(--muted); font-size:13px; margin-top:24px}
+</style>
+</head>
+<body>
+  <main class="wrap">
+    <div class="top">
+      <svg width="160" height="70" viewBox="0 0 190 84" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <polyline points="8,42 42,42 50,37 59,42 63,48 88,15 98,66 112,42 131,33 141,42 181,42"
+          stroke="#5ac3ff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <h1>Gizlilik Politikası</h1>
+      <div class="date">Mavi Kod · Son güncelleme: 20 Haziran 2026</div>
+    </div>
+
+    <p class="lead">Kısaca: Mavi Kod <strong>hiçbir kişisel veri toplamaz</strong>. Tüm kayıtlar yalnızca cihazınızda kalır.</p>
+
+    <section class="card">
+      <h2>1. Toplanan Veriler</h2>
+      <p>Mavi Kod sizden ad, e-posta, telefon, konum veya herhangi bir kişisel/sağlık verisi
+      <strong>istemez ve toplamaz</strong>. Hesap oluşturmanız gerekmez.</p>
+      <p>Eğitim/tatbikat sırasında oluşturduğunuz oturum kayıtları (zaman damgaları, olaylar,
+      süreler) yalnızca <strong>kendi cihazınızda yerel olarak</strong> saklanır ve istediğiniz
+      zaman silebilirsiniz.</p>
+    </section>
+
+    <section class="card">
+      <h2>2. Veri Paylaşımı ve Aktarımı</h2>
+      <p>Hiçbir veri sunuculara <strong>gönderilmez</strong>, bulutta saklanmaz veya üçüncü
+      taraflarla paylaşılmaz/satılmaz. Uygulama tamamen cihaz üzerinde çalışır.</p>
+    </section>
+
+    <section class="card">
+      <h2>3. Takip ve Analitik</h2>
+      <p>Mavi Kod reklam, izleme (tracking), çerez veya üçüncü taraf analitik araçları
+      <strong>kullanmaz</strong>.</p>
+    </section>
+
+    <section class="card">
+      <h2>4. İzinler</h2>
+      <p>Uygulama; konum, kişiler, kamera, mikrofon veya kişisel dosyalarınıza erişim
+      <strong>istemez</strong>. Yalnızca cihazın yerel depolama alanını (kendi oturum
+      kayıtlarınız için) kullanır.</p>
+    </section>
+
+    <section class="card">
+      <h2>5. Çocukların Gizliliği</h2>
+      <p>Uygulama sağlık profesyonellerine yöneliktir, çocuklardan bilerek veri toplamaz
+      (zaten hiç kişisel veri toplamaz).</p>
+    </section>
+
+    <section class="card">
+      <h2>6. Amaç ve Sınırlama</h2>
+      <p>Mavi Kod yalnızca <strong>eğitim ve simülasyon</strong> amaçlıdır; gerçek hasta
+      bakımında birincil karar aracı değildir. Tanı koymaz, doz/tedavi önermez.</p>
+    </section>
+
+    <section class="card">
+      <h2>7. Değişiklikler ve İletişim</h2>
+      <p>Bu politikada değişiklik olursa bu sayfada güncellenir. Sorularınız için:
+      <a href="mailto:destek@yazar.uk">destek@yazar.uk</a></p>
+      <a class="back" href="/mavikod">← Mavi Kod · Destek</a>
+    </section>
+
+    <footer>© 2026 Mert Çiftçi — Mavi Kod</footer>
+  </main>
+</body>
+</html>
