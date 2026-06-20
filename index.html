@@ -671,7 +671,7 @@ html[data-theme="light"] .sync-link:hover{color:#0000ff;}
 
 <div class="landing" id="fgktForm" style="display:none;">
   <div class="fgkt-panel">
-    <h2>🧠 FGKT-KKK Olgu Kayıt</h2>
+    <h2>FGKT-KKK Olgu Kayıt</h2>
     <div class="fgkt-score">FGKT-KKK: <b id="fgktScoreOut">—</b></div>
     <div id="fgktBanner" class="fgkt-banner" style="display:none;"></div>
     <div id="fgktBody"></div>
@@ -12891,7 +12891,7 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
   // Kullanıcı bazlı "Araçlar": her kullanıcının göreceği araçlar Supabase
   // user_metadata.tools (ya da app_metadata.tools) dizisinden gelir; tanımsızsa varsayılan.
   const TOOL_REGISTRY={
-    fgkt:{label:'🧠 FGKT-KKK Olgu Kayıt', fn:()=>window.showFgktForm()},
+    fgkt:{label:'FGKT-KKK Olgu Kayıt', fn:()=>window.showFgktForm()},
     fdr:{label:'Falls Decision Rule', fn:()=>window.showFdrForm()},
     dahili:{label:'🏥 Acil Dahili Hasta', fn:()=>window.selectMode('dahili')},
     adli:{label:'⚖️ Adli Muayene', fn:()=>window.selectMode('adli')},
